@@ -1,0 +1,34 @@
+import { clinic } from '../config/clinic'
+import { fromISO, fromMin, toISO, toMin } from './date'
+
+/** 그 날짜의 예약 가능 시각 목록 (점심시간 제외). 정기 휴진이면 빈 배열 */
+export function daySlots(iso: string): string[] {
+  const h = clinic.hours[fromISO(iso).getDay()]
+  if (!h) return []
+  const out: string[] = []
+  const end = toMin(h.close) - clinic.slotMinutes
+  for (let t = toMin(h.open); t <= end; t += clinic.slotMinutes) {
+    if (h.lunchStart && h.lunchEnd && t >= toMin(h.lunchStart) && t < toMin(h.lunchEnd)) continue
+    out.push(fromMin(t))
+  }
+  return out
+}
+
+export type TodayState = { kind: 'closed' | 'before' | 'open' | 'lunch' | 'after'; text: string }
+
+/** 첫 화면에 보여줄 "오늘 진료 여부" */
+export function todayState(now: Date, closedDates: Record<string, string>): TodayState {
+  const iso = toISO(now)
+  if (closedDates[iso] !== undefined) {
+    const why = closedDates[iso]
+    return { kind: 'closed', text: `오늘은 쉽니다${why ? ` (${why})` : ''}` }
+  }
+  const h = clinic.hours[now.getDay()]
+  if (!h) return { kind: 'closed', text: '오늘은 정기 휴진일입니다' }
+  const m = now.getHours() * 60 + now.getMinutes()
+  if (m < toMin(h.open)) return { kind: 'before', text: `오늘 ${h.open}부터 진료합니다` }
+  if (m >= toMin(h.close)) return { kind: 'after', text: '오늘 진료가 끝났습니다' }
+  if (h.lunchStart && h.lunchEnd && m >= toMin(h.lunchStart) && m < toMin(h.lunchEnd))
+    return { kind: 'lunch', text: `지금은 점심시간 · ${h.lunchEnd}부터 진료` }
+  return { kind: 'open', text: `오늘 진료 중 · ${h.close}까지` }
+}
