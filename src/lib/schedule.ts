@@ -1,5 +1,5 @@
 import { clinic } from '../config/clinic'
-import { fromISO, fromMin, toISO, toMin } from './date'
+import { fromISO, fromMin, prettyTime, toISO, toMin } from './date'
 
 /** 그 날짜의 예약 가능 시각 목록 (점심시간 제외). 정기 휴진이면 빈 배열 */
 export function daySlots(iso: string): string[] {
@@ -26,9 +26,11 @@ export function todayState(now: Date, closedDates: Record<string, string>): Toda
   const h = clinic.hours[now.getDay()]
   if (!h) return { kind: 'closed', text: '오늘은 정기 휴진일입니다' }
   const m = now.getHours() * 60 + now.getMinutes()
-  if (m < toMin(h.open)) return { kind: 'before', text: `오늘 ${h.open}부터 진료합니다` }
-  if (m >= toMin(h.close)) return { kind: 'after', text: '오늘 진료가 끝났습니다' }
+  const end = prettyTime(h.close)
+  const tag = h.night ? '야간진료' : '진료'
+  if (m < toMin(h.open)) return { kind: 'before', text: `오늘 ${prettyTime(h.open)}부터 ${end}까지${h.night ? ' 야간진료' : ' 진료'}합니다` }
+  if (m >= toMin(h.close)) return { kind: 'after', text: `오늘 ${tag}이 끝났습니다 (${end}까지)` }
   if (h.lunchStart && h.lunchEnd && m >= toMin(h.lunchStart) && m < toMin(h.lunchEnd))
-    return { kind: 'lunch', text: `지금은 점심시간 · ${h.lunchEnd}부터 진료` }
-  return { kind: 'open', text: `오늘 진료 중 · ${h.close}까지` }
+    return { kind: 'lunch', text: `지금은 점심시간 · ${prettyTime(h.lunchEnd)}부터 진료${h.night ? ` (오늘은 ${end}까지 야간진료)` : ''}` }
+  return { kind: 'open', text: h.night ? `오늘은 야간진료일 · ${end}까지 진료합니다` : `오늘 진료 중 · ${end}까지` }
 }

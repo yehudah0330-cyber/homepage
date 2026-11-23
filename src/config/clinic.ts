@@ -1,8 +1,8 @@
 // ★ 한의원 정보는 이 파일 한 곳만 고치면 앱 전체에 반영됩니다. (현재 값은 모두 샘플입니다)
-export type DayHours = { open: string; close: string; lunchStart?: string; lunchEnd?: string } | null
+export type DayHours = { open: string; close: string; lunchStart?: string; lunchEnd?: string; night?: boolean } | null
 
 const lunch = { lunchStart: '12:30', lunchEnd: '14:00' }
-const lateDay: DayHours = { open: '09:00', close: '20:00', ...lunch } // 월·수·금
+const lateDay: DayHours = { open: '09:00', close: '20:00', night: true, ...lunch } // 월·수·금
 const midDay: DayHours = { open: '09:00', close: '19:00', ...lunch } // 화·목
 
 export const clinic = {

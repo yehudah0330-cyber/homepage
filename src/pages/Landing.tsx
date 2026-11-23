@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Photo, TextSizeControl } from '../components/ui'
 import { clinic } from '../config/clinic'
@@ -13,13 +13,20 @@ const HERO = '/images/hero.jpg'
 
 export default function Landing() {
   const [state, setState] = useState<TodayState | null>(null)
+  const closedRef = useRef<Record<string, string>>({})
   const [closed, setClosed] = useState<Record<string, string>>({})
   const [notice, setNotice] = useState<Notice | null>(null)
   const [columns, setColumns] = useState<Column[]>([])
 
   useEffect(() => {
+    const t = setInterval(() => setState((s) => (s ? todayState(new Date(), closedRef.current) : s)), 60000)
+    return () => clearInterval(t)
+  }, [])
+
+  useEffect(() => {
     api.getClosedDays().then((c) => {
       setClosed(c)
+      closedRef.current = c
       setState(todayState(new Date(), c))
     })
     api.getNotices().then((n) => setNotice(n[0] ?? null))
