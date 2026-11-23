@@ -1,16 +1,18 @@
 // ★ 한의원 정보는 이 파일 한 곳만 고치면 앱 전체에 반영됩니다. (현재 값은 모두 샘플입니다)
 export type DayHours = { open: string; close: string; lunchStart?: string; lunchEnd?: string } | null
 
-const weekday: DayHours = { open: '09:00', close: '18:00', lunchStart: '13:00', lunchEnd: '14:00' }
+const lunch = { lunchStart: '12:30', lunchEnd: '14:00' }
+const lateDay: DayHours = { open: '09:00', close: '20:00', ...lunch } // 월·수·금
+const midDay: DayHours = { open: '09:00', close: '19:00', ...lunch } // 화·목
 
 export const clinic = {
   name: '신영통부부한의원',
   phone: '031-273-0061',
   address: '수원시 영통구 태장로 84, 망포프라자 2층',
   mapQuery: '수원시 영통구 태장로 84 망포프라자',
-  // TODO 진료시간: 실제 시간으로 고쳐 주세요 (지금은 임시 값입니다)
+  // 진료시간: 월·수·금 20시, 화·목 19시, 토 13시(점심 없음). 시작 시각 09:00 은 임시 값이니 확인해 주세요.
   // 요일별 진료시간 (0=일요일 … 6=토요일). null 이면 정기 휴진
-  hours: [null, weekday, weekday, weekday, weekday, weekday, { open: '09:00', close: '13:00' }] as DayHours[],
+  hours: [null, lateDay, midDay, lateDay, midDay, lateDay, { open: '09:00', close: '13:00' }] as DayHours[],
   slotMinutes: 30, // 예약 간격
   capacityPerSlot: 2, // 같은 시간에 받을 수 있는 인원
   bookingDays: 14, // 오늘부터 며칠 앞까지 예약 가능
