@@ -2,12 +2,13 @@ import { clinic } from '../config/clinic'
 import { daySlots } from '../lib/schedule'
 import { normPhone } from '../lib/date'
 import type { Api } from './api'
-import type { Notice, OutboxItem, Reservation } from './types'
+import type { Column, Notice, OutboxItem, Reservation } from './types'
 
 const K = {
   res: 'hw:reservations',
   closed: 'hw:closed',
   notices: 'hw:notices',
+  columns: 'hw:columns',
   notifyOff: 'hw:notifyOff',
   outbox: 'hw:outbox'
 }
@@ -36,6 +37,18 @@ function getNotices(): Notice[] {
   ]
   save(K.notices, first)
   return first
+}
+
+function getColumns(): Column[] {
+  const c = load<Column[] | null>(K.columns, null)
+  if (c) return c
+  const first: Column[] = clinic.sampleColumns.map((s) => ({ id: uid(), title: s.title, body: s.body, date: s.date, createdAt: s.date + 'T09:00:00.000Z' }))
+  save(K.columns, first)
+  return first
+}
+const todayStr = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 function used(all: Reservation[], date: string, time: string, ignoreId?: string) {
@@ -126,6 +139,23 @@ export const localApi: Api = {
   },
   async deleteNotice(id) {
     save(K.notices, getNotices().filter((x) => x.id !== id))
+  },
+  async getColumns() {
+    return [...getColumns()].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  },
+  async saveColumn(c) {
+    const all = getColumns()
+    if (c.id) {
+      const f = all.find((x) => x.id === c.id)
+      if (f) {
+        f.title = c.title
+        f.body = c.body
+      }
+    } else all.push({ id: uid(), title: c.title, body: c.body, date: todayStr(), createdAt: new Date().toISOString() })
+    save(K.columns, all)
+  },
+  async deleteColumn(id) {
+    save(K.columns, getColumns().filter((x) => x.id !== id))
   },
   async isNotifyOn(phone) {
     return !load<string[]>(K.notifyOff, []).includes(normPhone(phone))

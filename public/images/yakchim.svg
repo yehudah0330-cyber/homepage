@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="약침 치료 일러스트">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7f1e5"/><stop offset="1" stop-color="#e3ebf5"/></linearGradient>
+    <linearGradient id="liq" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d8b36a"/><stop offset="1" stop-color="#b98a3a"/></linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <circle cx="620" cy="130" r="210" fill="#1f3a5f" opacity=".07"/>
+  <circle cx="150" cy="520" r="180" fill="#c9a45c" opacity=".12"/>
+  <!-- herb leaves -->
+  <g fill="#3a5f8f" opacity=".85">
+    <path d="M110 470c-10-70 20-120 80-150 10 70-20 130-80 150z"/>
+    <path d="M110 470c40-60 90-80 150-70-30 60-90 85-150 70z" fill="#5f84b3"/>
+    <path d="M690 470c10-70-20-120-80-150-10 70 20 130 80 150z"/>
+    <path d="M690 470c-40-60-90-80-150-70 30 60 90 85 150 70z" fill="#5f84b3"/>
+  </g>
+  <!-- ampoule -->
+  <g transform="translate(400 300)">
+    <path d="M-34 -190h68v70c30 22 46 58 46 100v170a46 46 0 0 1-46 46h-68a46 46 0 0 1-46-46v-170c0-42 16-78 46-100z" fill="#fff" stroke="#1f3a5f" stroke-width="6"/>
+    <path d="M-80 20h160v150a46 46 0 0 1-46 46h-68a46 46 0 0 1-46-46z" fill="url(#liq)"/>
+    <rect x="-40" y="-205" width="80" height="26" rx="8" fill="#1f3a5f"/>
+    <path d="M-52 -30c0 40 0 120 0 170" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".7" fill="none"/>
+    <text x="0" y="120" text-anchor="middle" font-family="'Noto Serif KR','Batang',serif" font-size="46" font-weight="700" fill="#14294a">藥鍼</text>
+  </g>
+  <!-- needle -->
+  <g stroke="#1f3a5f" stroke-linecap="round">
+    <line x1="560" y1="170" x2="690" y2="300" stroke-width="7"/>
+    <line x1="690" y1="300" x2="735" y2="345" stroke-width="3"/>
+    <circle cx="548" cy="158" r="14" fill="#c9a45c" stroke="none"/>
+  </g>
+  <text x="400" y="565" text-anchor="middle" font-family="'Noto Serif KR','Batang',serif" font-size="30" fill="#14294a" font-weight="700">약침 치료</text>
+</svg>

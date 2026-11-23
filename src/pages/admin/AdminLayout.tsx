@@ -42,6 +42,7 @@ export default function AdminLayout() {
       <nav className="tabs" aria-label="관리 메뉴">
         <NavLink to="/admin" end>예약</NavLink>
         <NavLink to="/admin/notices">공지</NavLink>
+        <NavLink to="/admin/columns">칼럼</NavLink>
         <NavLink to="/admin/closed">휴진일</NavLink>
         <NavLink to="/admin/alerts">알림</NavLink>
       </nav>

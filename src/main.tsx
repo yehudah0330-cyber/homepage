@@ -15,6 +15,7 @@ import Settings from './pages/Settings'
 import Privacy from './pages/Privacy'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminReservations from './pages/admin/Reservations'
+import AdminColumns from './pages/admin/Columns'
 import AdminNotices from './pages/admin/Notices'
 import AdminClosed from './pages/admin/ClosedDays'
 import AdminAlerts from './pages/admin/Alerts'
@@ -38,6 +39,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminReservations />} />
           <Route path="notices" element={<AdminNotices />} />
+          <Route path="columns" element={<AdminColumns />} />
           <Route path="closed" element={<AdminClosed />} />
           <Route path="alerts" element={<AdminAlerts />} />
         </Route>

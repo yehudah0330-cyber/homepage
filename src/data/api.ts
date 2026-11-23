@@ -1,4 +1,4 @@
-import type { CreateInput, NextCare, Notice, OutboxItem, Reservation } from './types'
+import type { Column, CreateInput, NextCare, Notice, OutboxItem, Reservation } from './types'
 import { localApi } from './localApi'
 import { cloudflareApi } from './cloudflareApi'
 
@@ -21,6 +21,9 @@ export interface Api {
   getNotices(): Promise<Notice[]>
   saveNotice(n: { id?: string; text: string }): Promise<void>
   deleteNotice(id: string): Promise<void>
+  getColumns(): Promise<Column[]>
+  saveColumn(c: { id?: string; title: string; body: string }): Promise<void>
+  deleteColumn(id: string): Promise<void>
   isNotifyOn(phone: string): Promise<boolean>
   setNotifyOn(phone: string, on: boolean): Promise<void>
   getOutbox(): Promise<OutboxItem[]>

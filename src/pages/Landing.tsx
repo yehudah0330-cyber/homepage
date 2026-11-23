@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Photo, TextSizeControl } from '../components/ui'
 import { clinic } from '../config/clinic'
 import { api } from '../data/api'
-import type { Notice } from '../data/types'
+import type { Column, Notice } from '../data/types'
 import { DAY_NAMES, todayISO } from '../lib/date'
 import { todayState, type TodayState } from '../lib/schedule'
 
@@ -15,6 +15,7 @@ export default function Landing() {
   const [state, setState] = useState<TodayState | null>(null)
   const [closed, setClosed] = useState<Record<string, string>>({})
   const [notice, setNotice] = useState<Notice | null>(null)
+  const [columns, setColumns] = useState<Column[]>([])
 
   useEffect(() => {
     api.getClosedDays().then((c) => {
@@ -22,6 +23,7 @@ export default function Landing() {
       setState(todayState(new Date(), c))
     })
     api.getNotices().then((n) => setNotice(n[0] ?? null))
+    api.getColumns().then(setColumns)
   }, [])
 
   const q = encodeURIComponent(clinic.mapQuery)
@@ -37,6 +39,7 @@ export default function Landing() {
           <nav className="site-nav" aria-label="홈페이지 메뉴">
             <a href="#care">진료 안내</a>
             <a href="#doctor">의료진</a>
+            <a href="#column">원장 칼럼</a>
             <a href="#hours">진료시간</a>
             <a href="#where">오시는 길</a>
           </nav>
@@ -73,7 +76,7 @@ export default function Landing() {
           <p className="muted">회원가입은 필요 없습니다. 예약이 확정·변경·취소되면 카카오톡이나 문자로 알려 드립니다.</p>
         </section>
 
-        <section id="care" className="band sand">
+        <section id="care" className="band">
           <div className="site-wrap">
             <p className="eyebrow dark">TREATMENT</p>
             <h2 className="sec-title">진료 안내</h2>
@@ -103,6 +106,31 @@ export default function Landing() {
               {doc.philosophy && <p className="quote">“{doc.philosophy}”</p>}
               {doc.career.length > 0 && <ul>{doc.career.map((c) => <li key={c}>{c}</li>)}</ul>}
               {!doc.philosophy && doc.career.length === 0 && <p>약력과 진료 철학은 곧 안내해 드리겠습니다.</p>}
+            </div>
+          </div>
+        </section>
+
+        <section id="column" className="band sand">
+          <div className="site-wrap">
+            <p className="eyebrow dark">COLUMN</p>
+            <h2 className="sec-title">원장 칼럼</h2>
+            <div className="svc-grid three">
+              {columns.map((c) => {
+                const paras = c.body.split(/\n\s*\n/).map((t) => t.trim()).filter(Boolean)
+                const first = paras[0] ?? ''
+                return (
+                  <details key={c.id} className="card column">
+                    <summary>
+                      <time dateTime={c.date}>{c.date.replace(/-/g, '.')}</time>
+                      <h3>{c.title}</h3>
+                      <p>{first.slice(0, 60)}{first.length > 60 ? '…' : ''}</p>
+                      <span className="more">글 읽기</span>
+                    </summary>
+                    {paras.map((t, i) => <p key={i}>{t}</p>)}
+                  </details>
+                )
+              })}
+              {columns.length === 0 && <p className="muted">곧 원장 칼럼이 올라옵니다.</p>}
             </div>
           </div>
         </section>

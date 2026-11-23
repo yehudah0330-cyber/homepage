@@ -40,7 +40,7 @@ export default function Home() {
         <BigButton href={`tel:${clinic.phone.replace(/\D/g, '')}`} icon="📞" label="전화하기" sub={clinic.phone} tone="leaf" />
         <BigButton to="/directions" icon="📍" label="오시는 길" sub="지도 · 주차 · 대중교통" tone="sand" />
         <BigButton to="/hours" icon="🕘" label="진료시간" sub="점심시간 · 휴진일" tone="sand" />
-        <BigButton to="/care" icon="🌿" label="진료 안내" sub="침 · 추나 · 한약 · 다이어트" tone="leaf" />
+        <BigButton to="/care" icon="🌿" label="진료 안내" sub="침 · 약침 · 한약 · 다이어트" tone="leaf" />
       </nav>
 
       <div className="homelinks">

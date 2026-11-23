@@ -238,3 +238,13 @@ html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
   .site { padding-bottom: 0; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* 원장 칼럼 */
+.column { padding: 0; overflow: hidden; gap: 0; }
+.column summary { list-style: none; cursor: pointer; padding: 1.1rem 1.3rem; display: grid; gap: .4rem; min-height: 2.75rem; }
+.column summary::-webkit-details-marker { display: none; }
+.column time { color: var(--gold-dark); font-weight: 700; font-size: .85rem; }
+.column h3 { font-family: var(--serif); font-size: 1.25rem; color: var(--deep); }
+.column .more { color: var(--green); font-weight: 800; }
+.column[open] .more { display: none; }
+.column > p { padding: 0 1.3rem 1.1rem; line-height: 1.8; }

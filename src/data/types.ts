@@ -10,6 +10,7 @@ export type Reservation = {
   nextCare?: NextCare
 }
 export type Notice = { id: string; text: string; createdAt: string }
+export type Column = { id: string; title: string; body: string; date: string; createdAt: string } // body: 빈 줄로 문단 구분
 export type MessageKind = 'confirm' | 'change' | 'cancel' | 'reminder' | 'care'
 export type OutboxItem = {
   id: string
