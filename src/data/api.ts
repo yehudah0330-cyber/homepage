@@ -30,4 +30,6 @@ export interface Api {
   addOutbox(item: Omit<OutboxItem, 'id' | 'at'>): Promise<void>
 }
 
-export const api: Api = import.meta.env.VITE_API_BASE ? cloudflareApi : localApi
+const local = typeof location !== 'undefined' && ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)
+/** 실제 사이트(도메인)에서는 서버(Cloudflare)를, 내 컴퓨터(localhost)에서 개발할 때는 이 기기 저장소를 씁니다. */
+export const api: Api = local && !import.meta.env.VITE_API_BASE ? localApi : cloudflareApi

@@ -42,5 +42,5 @@ export const cloudflareApi: Api = {
   isNotifyOn: (phone) => call<{ on: boolean }>(`/api/notify?${q({ phone })}`).then((r) => r.on),
   setNotifyOn: (phone, on) => call('/api/notify', 'PUT', { phone, on }),
   getOutbox: () => call('/api/admin/outbox'),
-  addOutbox: (item) => call('/api/admin/outbox', 'POST', item)
+  addOutbox: (item) => call('/api/outbox', 'POST', item)
 }

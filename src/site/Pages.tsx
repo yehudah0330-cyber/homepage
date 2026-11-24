@@ -129,6 +129,13 @@ export function LocationPage() {
       <div className="site-wrap page-pad where">
         <p className="addr">{clinic.address}</p>
         <p>대표전화 <a href={tel}>{clinic.phone}</a></p>
+        <iframe
+          className="map"
+          title="한의원 위치 지도"
+          loading="lazy"
+          src="https://www.openstreetmap.org/export/embed.html?bbox=127.0515%2C37.2365%2C127.0595%2C37.2415&layer=mapnik&marker=37.23897%2C127.05553"
+        />
+        <p className="muted">지도는 대략적인 위치입니다. 길찾기는 아래 버튼으로 네이버지도·카카오맵에서 확인해 주세요.</p>
         <div className="two">
           <a className="btn primary" href={`https://map.naver.com/p/search/${q}`} target="_blank" rel="noopener noreferrer">네이버지도로 보기</a>
           <a className="btn primary alt" href={`https://map.kakao.com/link/search/${q}`} target="_blank" rel="noopener noreferrer">카카오맵으로 보기</a>
