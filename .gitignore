@@ -4,3 +4,5 @@ dist
 naver-blog-tool/
 .claude/
 skills-lock.json
+
+.wrangler/
