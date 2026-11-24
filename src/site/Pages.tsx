@@ -9,10 +9,9 @@ import { Icon } from './Icon'
 import { HoursTable } from './Home'
 import { tel } from './SiteLayout'
 
-function Banner({ title, image, sub }: { title: string; image: string; sub?: string }) {
-  const img = image.endsWith('.svg') ? '/images/hero.jpg' : image
+function Banner({ title, sub }: { title: string; image?: string; sub?: string }) {
   return (
-    <section className="banner" style={{ backgroundImage: `linear-gradient(rgba(58,42,32,.62), rgba(58,42,32,.62)), url(${img})` }}>
+    <section className="banner">
       <div className="site-wrap">
         <h1>{title}</h1>
         {sub && <p>{sub}</p>}
@@ -22,16 +21,16 @@ function Banner({ title, image, sub }: { title: string; image: string; sub?: str
 }
 
 function Crumb({ items }: { items: string[] }) {
-  return <p className="crumb site-wrap">홈 · {items.join(' · ')}</p>
+  return <p className="crumb site-wrap">홈 &gt; {items.join(' > ')}</p>
 }
 
 function Cta({ children }: { children?: ReactNode }) {
   return (
     <div className="cta-band">
       <div className="site-wrap cta-in">
-        <p>{children ?? '어디가 불편하신지 편하게 말씀해 주세요.'}</p>
+        <p>{children ?? '진료 예약과 문의는 전화로도 받습니다.'}</p>
         <div className="cta-btns">
-          <Link className="btn gold" to="/reserve">진료 예약</Link>
+          <Link className="btn light" to="/reserve">진료 예약</Link>
           <a className="btn outline-light" href={tel}>전화 {clinic.phone}</a>
         </div>
       </div>
@@ -198,8 +197,8 @@ export function ColumnView() {
         <h2 className="sec-title">{c.title}</h2>
         {paras.map((t, k) => <p key={k}>{t}</p>)}
         <div className="post-nav">
-          {newer ? <Link to={`/column/${newer.id}`}>← 다음 글 · {newer.title}</Link> : <span />}
-          {older && <Link to={`/column/${older.id}`}>이전 글 · {older.title} →</Link>}
+          {newer ? <Link to={`/column/${newer.id}`}>← 다음 글: {newer.title}</Link> : <span />}
+          {older && <Link to={`/column/${older.id}`}>이전 글: {older.title} →</Link>}
         </div>
         <Link className="more-link" to="/column"><Icon name="arrow" /> 목록으로</Link>
       </article>

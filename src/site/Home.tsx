@@ -33,29 +33,28 @@ export default function SiteHome() {
 
   return (
     <main>
-      <section className="hero" style={{ backgroundImage: `linear-gradient(100deg, rgba(58,42,32,.88) 0%, rgba(58,42,32,.62) 50%, rgba(58,42,32,.2) 100%), url(${HERO})` }}>
-        <div className="site-wrap hero-in">
-          <p className="hero-name">{clinic.name}</p>
-          {state && <p className={`today ${state.kind}`} aria-live="polite"><span className="dot" aria-hidden="true" />{state.text}</p>}
-          <h1 className="hero-title">
-            <span className="ink">몸과 마음의 균형을</span>
-            <span className="ink">정성으로 돌봅니다</span>
-          </h1>
-          <p className="hero-sub">한 분 한 분의 이야기를 충분히 듣고, 꼭 필요한 치료만 따뜻하게 해 드립니다.</p>
-          <div className="hero-btns">
-            <Link className="btn gold" to="/reserve">전화 없이 예약하기</Link>
-            <a className="btn outline-light" href={tel}>전화 {clinic.phone}</a>
+      <section className="hero2">
+        <div className="site-wrap hero2-in">
+          <div className="hero2-text">
+            <p className="hero-name">{clinic.name}</p>
+            {state && <p className={`today ${state.kind}`} aria-live="polite"><span className="dot" aria-hidden="true" />{state.text}</p>}
+            <h1 className="hero-title">충분히 듣고,<br />필요한 치료만 합니다.</h1>
+            <p className="hero-sub">침, 약침, 한약, 체중 관리를 진료합니다.</p>
+            <div className="hero-btns">
+              <Link className="btn primary" to="/reserve">진료 예약</Link>
+              <a className="btn ghost" href={tel}>전화 {clinic.phone}</a>
+            </div>
           </div>
+          <img className="hero2-img" src={HERO} alt="" />
         </div>
       </section>
 
-      <div className="site-wrap quick-wrap">
-        <nav className="quick" aria-label="자주 찾는 메뉴">
-          <Link to="/about/location"><Icon name="pin" /><span>오시는 길</span></Link>
-          <Link to="/about/hours"><Icon name="clock" /><span>진료시간 안내</span></Link>
-          <Link to="/treatment/acu"><Icon name="leaf" /><span>진료 안내</span></Link>
-          <Link to="/reserve"><Icon name="calendar" /><span>진료 예약</span></Link>
-        </nav>
+      <div className="site-wrap">
+        <dl className="facts">
+          <div><dt>전화</dt><dd><a href={tel}>{clinic.phone}</a></dd></div>
+          <div><dt>위치</dt><dd>{clinic.address}</dd></div>
+          <div><dt>점심시간</dt><dd>{clinic.hours[1]?.lunchStart}~{clinic.hours[1]?.lunchEnd} <small>(토요일은 점심시간 없이 진료)</small></dd></div>
+        </dl>
       </div>
 
       {notice && <div className="site-wrap"><p className="notice"><b>공지</b> {notice.text}</p></div>}
@@ -66,18 +65,16 @@ export default function SiteHome() {
             <h2 className="sec-title">진료 안내</h2>
             <Link className="more-link" to="/treatment/acu">전체 보기 <Icon name="arrow" /></Link>
           </div>
-          <div className="tiles">
+          <ul className="svc">
             {clinic.services.map((s) => (
-              <Link key={s.id} to={`/treatment/${s.id}`} className="tile">
-                <Photo src={s.image} label={s.title} />
-                <div className="tile-body">
-                  <h3>{s.title}</h3>
-                  <p>{s.summary}</p>
-                  <span className="more-link">자세히 보기 <Icon name="arrow" /></span>
-                </div>
-              </Link>
+              <li key={s.id}>
+                <Link to={`/treatment/${s.id}`}>
+                  <span className="svc-text"><b>{s.title}</b><span>{s.summary}</span></span>
+                  <Photo src={s.image} label={s.title} />
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
