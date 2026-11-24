@@ -30,6 +30,14 @@ export default function SiteLayout() {
     setOpen(false)
     window.scrollTo(0, 0)
   }, [pathname])
+  useEffect(() => {
+    const s = clinic.services.find((x) => pathname === `/treatment/${x.id}`)
+    const names: Record<string, string> = { '/about/doctor': '의료진 소개', '/about/hours': '진료시간', '/about/location': '오시는 길', '/column': '원장 칼럼' }
+    const page = s ? `${s.title} 안내` : names[pathname]
+    document.title = page ? `${page} | ${clinic.name} 수원 영통구 한의원` : `${clinic.name} | 수원 영통구 망포 한의원 · 침 · 약침 · 한약 · 다이어트`
+    const link = document.querySelector('link[rel="canonical"]')
+    if (link) link.setAttribute('href', `https://bubuhani.com${pathname === '/' ? '/' : pathname}`)
+  }, [pathname])
 
   return (
     <div className="site">
