@@ -35,6 +35,7 @@ export default function SiteHome() {
     <main>
       <section className="hero" style={{ backgroundImage: `linear-gradient(100deg, rgba(58,42,32,.88) 0%, rgba(58,42,32,.62) 50%, rgba(58,42,32,.2) 100%), url(${HERO})` }}>
         <div className="site-wrap hero-in">
+          <p className="hero-name">{clinic.name}</p>
           {state && <p className={`today ${state.kind}`} aria-live="polite"><span className="dot" aria-hidden="true" />{state.text}</p>}
           <h1 className="hero-title">
             <span className="ink">몸과 마음의 균형을</span>

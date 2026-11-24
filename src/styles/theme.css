@@ -178,8 +178,10 @@ html { scrollbar-color: var(--green) var(--bg); scroll-behavior: smooth; scroll-
 .site-util .textsize button { min-height: 2rem; padding: 0 .7rem; font-size: .8rem; }
 
 .site-head { position: sticky; top: 0; z-index: 30; background: rgba(244, 237, 226, .97); border-bottom: 1px solid var(--line); }
-.site-head-in { display: flex; align-items: center; gap: 1rem; min-height: 4.2rem; }
-.site .brand { font-family: var(--serif); letter-spacing: -.02em; color: var(--green-dark); font-size: 1.35rem; }
+.site-head-in { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 4.6rem; }
+.site .brand { font-family: var(--serif); letter-spacing: -.03em; color: var(--green-dark); font-size: 1.65rem; font-weight: 800; line-height: 1.1; text-decoration: none; }
+.site-head .site-cta { display: none; }
+.hero-name { font-family: var(--serif); font-size: 2.3rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; color: var(--gold); }
 .site-nav { display: none; margin-left: auto; gap: .2rem; }
 .nav-item { position: relative; }
 .nav-top { display: flex; align-items: center; min-height: 4.2rem; padding: 0 1.2rem; text-decoration: none; font-weight: 800; color: var(--ink); border-bottom: 3px solid transparent; }
@@ -289,7 +291,7 @@ html { scrollbar-color: var(--green) var(--bg); scroll-behavior: smooth; scroll-
 .site-foot { background: var(--green-dark); color: #e9dcc7; padding: 2.2rem 0; }
 .site-foot a { color: #fff; }
 .site-foot .muted { color: #cdbca3; }
-.foot-name { font-family: var(--serif); font-size: 1.3rem; color: var(--gold); }
+.foot-name { font-family: var(--serif); font-size: 1.7rem; font-weight: 800; color: var(--gold); }
 .foot-in { display: grid; gap: 1.2rem; }
 .foot-links { display: grid; gap: .2rem; }
 .foot-links a { min-height: 2.75rem; display: flex; align-items: center; font-weight: 700; }
@@ -308,8 +310,11 @@ html { scrollbar-color: var(--green) var(--bg); scroll-behavior: smooth; scroll-
   .util-in > span { display: block; }
   .burger, .m-menu { display: none; }
   .site-nav { display: flex; }
-  .site-head .site-cta { margin-left: 0; }
-  .hero { padding: 7rem 0 8rem; }
+  .site-head .site-cta { display: inline-flex; margin-left: 0; }
+  .site .brand { font-size: 2.1rem; }
+  .nav-top { min-height: 4.6rem; }
+  .hero-name { font-size: 3.6rem; }
+  .hero { padding: 6rem 0 8rem; }
   .hero-title { font-size: 3.3rem; }
   .hero-sub { font-size: 1.2rem; }
   .hero-btns { grid-template-columns: 1fr 1fr; width: 34rem; }
