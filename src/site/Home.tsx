@@ -36,10 +36,10 @@ export default function SiteHome() {
       <section className="hero2">
         <div className="site-wrap hero2-in">
           <div className="hero2-text">
-            <p className="hero-name">{clinic.name}</p>
+            <h1 className="hero-name">{clinic.name}</h1>
             {state && <p className={`today ${state.kind}`} aria-live="polite"><span className="dot" aria-hidden="true" />{state.text}</p>}
-            <h1 className="hero-title">충분히 듣고,<br />필요한 치료만 합니다.</h1>
-            <p className="hero-sub">침, 약침, 한약, 체중 관리를 진료합니다.</p>
+            <p className="hero-title">충분히 듣고,<br />필요한 치료만 합니다.</p>
+            <p className="hero-sub">수원시 영통구 망포동에서 침, 약침, 한약, 체중 관리를 진료합니다.</p>
             <div className="hero-btns">
               <Link className="btn primary" to="/reserve">진료 예약</Link>
               <a className="btn ghost" href={tel}>전화 {clinic.phone}</a>

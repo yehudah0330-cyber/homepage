@@ -91,6 +91,7 @@ export default function SiteLayout() {
             {clinic.showPrepNotice && <p className="muted">※ 일부 안내는 준비 중입니다. 정확한 내용은 전화로 확인해 주세요.</p>}
           </div>
           <div className="foot-links">
+            <a href="https://blog.naver.com/caccactus" target="_blank" rel="noopener noreferrer">네이버 블로그</a>
             <Link to="/my">내 예약 확인</Link>
             <Link to="/privacy">개인정보 처리 안내</Link>
             <Link to="/app">앱 화면으로 보기</Link>

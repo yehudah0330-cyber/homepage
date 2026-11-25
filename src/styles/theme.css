@@ -436,3 +436,5 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outlin
   .hero2 .hero-name { font-size: 4rem; }
   .hero2 .hero-title { font-size: 1.7rem; font-weight: 400; }
 }
+
+.hero-name { margin: 0; }
