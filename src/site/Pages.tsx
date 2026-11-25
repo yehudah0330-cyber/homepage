@@ -111,6 +111,7 @@ export function HoursPage() {
             <ul>{upcoming.map(([k, why]) => <li key={k}>{Number(k.slice(5, 7))}월 {Number(k.slice(8))}일 {why && `· ${why}`}</li>)}</ul>
           )}
           <p className="muted">진료 시간 중 점심시간에는 진료하지 않습니다.</p>
+          <p className="muted">{clinic.holidayNote}</p>
         </div>
       </div>
       <Cta />

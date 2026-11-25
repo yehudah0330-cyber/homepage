@@ -113,6 +113,7 @@ export default function SiteHome() {
           <div>
             <h2 className="sec-title">진료시간</h2>
             <HoursTable />
+            <p className="muted">{clinic.holidayNote}</p>
           </div>
           <div className="side">
             <h2 className="sec-title">오시는 길</h2>

@@ -3,6 +3,7 @@ import { fromISO, fromMin, prettyTime, toISO, toMin } from './date'
 
 /** 그 날짜의 예약 가능 시각 목록 (점심시간 제외). 정기 휴진이면 빈 배열 */
 export function daySlots(iso: string): string[] {
+  if (clinic.closedHolidays[iso] !== undefined) return []
   const h = clinic.hours[fromISO(iso).getDay()]
   if (!h) return []
   const out: string[] = []
@@ -19,6 +20,9 @@ export type TodayState = { kind: 'closed' | 'before' | 'open' | 'lunch' | 'after
 /** 첫 화면에 보여줄 "오늘 진료 여부" */
 export function todayState(now: Date, closedDates: Record<string, string>): TodayState {
   const iso = toISO(now)
+  if (clinic.closedHolidays[iso] !== undefined && closedDates[iso] === undefined) {
+    return { kind: 'closed', text: `오늘은 ${clinic.closedHolidays[iso]}이라 쉽니다` }
+  }
   if (closedDates[iso] !== undefined) {
     const why = closedDates[iso]
     return { kind: 'closed', text: `오늘은 쉽니다${why ? ` (${why})` : ''}` }
