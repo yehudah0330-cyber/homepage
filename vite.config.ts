@@ -2,10 +2,10 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   plugins: [
     react(),
-    VitePWA({
+    ...(isSsrBuild ? [] : [VitePWA({
       registerType: 'autoUpdate',
       manifest: {
         name: '신영통부부한의원',
@@ -22,6 +22,6 @@ export default defineConfig({
         ]
       },
       workbox: { navigateFallback: '/index.html' }
-    })
+    })])
   ]
-})
+}))
