@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { TextSizeControl } from '../components/ui'
 import { clinic } from '../config/clinic'
+import { useHeaderFx } from './fx'
 import { Icon } from './Icon'
 
 export const tel = `tel:${clinic.phone.replace(/\D/g, '')}`
@@ -26,6 +27,7 @@ export const MENUS: Menu[] = [
 export default function SiteLayout() {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
+  useHeaderFx()
   useEffect(() => {
     setOpen(false)
     window.scrollTo(0, 0)
@@ -41,6 +43,7 @@ export default function SiteLayout() {
 
   return (
     <div className="site">
+      <span className="cx-read-bar" aria-hidden="true" />
       <div className="site-util">
         <div className="site-wrap util-in">
           <span>{clinic.address}</span>
