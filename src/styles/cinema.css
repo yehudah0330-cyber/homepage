@@ -286,3 +286,14 @@
 .site .cx-card-body b { font-size: 1.5rem; }
 .site .cx-flow li b { font-size: 1.4rem; }
 @media (min-width: 900px) { .site .cx-name { font-size: min(4rem, 5.4vw); } }
+
+/* ── 자주 묻는 질문 ── */
+.cx-qa { display: grid; gap: .7rem; align-items: start; }
+.cx-qa details { border-radius: 18px; border: 1px solid rgba(255, 255, 255, .9); background: rgba(255, 252, 245, .72); box-shadow: 0 8px 22px rgba(60, 48, 20, .08); }
+.cx-qa summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 3.4rem; padding: .7rem 1.2rem; cursor: pointer; list-style: none; }
+.cx-qa summary::-webkit-details-marker { display: none; }
+.cx-qa summary::after { content: '+'; flex: none; font-size: 1.4rem; line-height: 1; color: var(--accent); transition: rotate .3s; }
+.cx-qa details[open] summary::after { rotate: 45deg; }
+.site .cx-qa h3 { margin: 0; font-size: 1rem; line-height: 1.5; color: var(--green-dark); word-break: keep-all; }
+.cx-qa p { margin: 0; padding: 0 1.2rem 1.1rem; color: var(--muted); word-break: keep-all; }
+@media (min-width: 900px) { .cx-qa { grid-template-columns: 1fr 1fr; } }

@@ -7,7 +7,7 @@
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
     "html_handling": "drop-trailing-slash",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/*", "!/assets/*", "!/images/*"]
   },
   "d1_databases": [
     { "binding": "DB", "database_name": "bubuhani-db", "database_id": "f9659050-89c0-490b-bde0-cd06f0da91ea" }

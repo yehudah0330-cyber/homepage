@@ -1,11 +1,12 @@
 /**
  * 신영통부부한의원 서버 (Cloudflare Worker + D1)
- * - /api/* 만 이 코드가 처리하고, 나머지는 홈페이지 파일(assets)을 그대로 내보냅니다.
+ * - /api/* 는 아래 코드가, 화면 요청은 pages.ts 가 처리합니다. (/assets, /images 파일은 코드를 거치지 않음)
  * - /api/admin/* 는 Cloudflare Access 가 붙여 주는 로그인 증명(JWT)을 검증한 뒤에만 열립니다.
  *   설정(ACCESS_TEAM_DOMAIN, ACCESS_AUD)이 비어 있으면 관리자 기능은 닫혀 있습니다.
  */
 import { clinic } from '../src/config/clinic'
 import { daySlots } from '../src/lib/schedule'
+import { pageRequest, redirect } from './pages'
 
 // ── 최소 타입 (외부 타입 패키지 없이 사용) ──
 type Stmt = { bind: (...v: unknown[]) => Stmt; first: <T = Record<string, unknown>>() => Promise<T | null>; all: <T = Record<string, unknown>>() => Promise<{ results: T[] }>; run: () => Promise<unknown> }
@@ -126,7 +127,11 @@ async function slotError(db: D1, date: string, time: string, ignoreId?: string):
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url)
-    if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(req)
+    const moved = redirect(url)
+    if (moved) return moved
+    if (!url.pathname.startsWith('/api/')) {
+      return pageRequest(req, env, url)
+    }
     try {
       await ensureSchema(env.DB)
       return await route(req, env, url)

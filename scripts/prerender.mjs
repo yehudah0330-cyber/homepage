@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url'
 const dist = path.resolve('dist')
 const serverDir = path.resolve('dist-server')
 const entry = fs.readdirSync(serverDir).find((f) => /^entry-server\.(m?js)$/.test(f))
-const { render, pages } = await import(pathToFileURL(path.join(serverDir, entry)).href)
+const { render, pages, faqJsonLd } = await import(pathToFileURL(path.join(serverDir, entry)).href)
 const template = fs.readFileSync(path.join(dist, 'index.html'), 'utf8')
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
 
@@ -20,6 +20,7 @@ for (const pg of pages()) {
     .replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${esc(pg.title)}$2`)
     .replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${esc(pg.description)}$2`)
     .replace(/(<meta property="og:url" content=")[^"]*(")/, `$1https://bubuhani.com${pg.url === '/' ? '/' : pg.url}$2`)
+  if (pg.url === '/') html = html.replace('</head>', () => `<script type="application/ld+json" data-faq>${faqJsonLd()}</script>\n  </head>`)
   const out = pg.url === '/' ? path.join(dist, 'index.html') : path.join(dist, pg.url, 'index.html')
   fs.mkdirSync(path.dirname(out), { recursive: true })
   fs.writeFileSync(out, html)

@@ -3,6 +3,7 @@ import { renderToString } from 'react-dom/server'
 import { StaticRouter } from 'react-router-dom/server'
 import { Route, Routes } from 'react-router-dom'
 import { clinic } from './config/clinic'
+import { faq } from './config/faq'
 import SiteLayout from './site/SiteLayout'
 import SiteHome from './site/Home'
 import { ColumnList, DoctorPage, HoursPage, LocationPage, Treatment } from './site/Pages'
@@ -36,3 +37,11 @@ export function pages(): { url: string; title: string; description: string }[] {
     { url: '/column', title: `원장 칼럼 | ${n} 수원 영통구 한의원`, description: `${n} 원장이 직접 쓰는 건강 이야기.` }
   ]
 }
+
+/** 첫 화면의 "자주 묻는 질문"을 검색엔진이 읽는 형식으로 */
+export const faqJsonLd = () =>
+  JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } }))
+  }).replace(/</g, '\\u003c')

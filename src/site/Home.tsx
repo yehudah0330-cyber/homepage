@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { Photo } from '../components/ui'
 import { clinic } from '../config/clinic'
+import { faq } from '../config/faq'
 import { api } from '../data/api'
 import blogPosts from '../data/blog.json'
 import type { Column, Notice } from '../data/types'
@@ -197,6 +198,22 @@ export default function SiteHome() {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      <section className="cx-sec cx-faq">
+        <div className="site-wrap">
+          <div className="cx-head" data-reveal>
+            <h2>자주 묻는 질문</h2>
+          </div>
+          <div className="cx-qa">
+            {faq.map((f, i) => (
+              <details key={f.q} data-reveal style={nth(i % 2)}>
+                <summary><h3>{f.q}</h3></summary>
+                <p>{f.a}</p>
+              </details>
+            ))}
+          </div>
         </div>
       </section>
 
