@@ -1,0 +1,33 @@
+name: 블로그 새 글 가져오기
+
+on:
+  schedule:
+    - cron: '17 21 * * *' # 매일 한국 시간 오전 6시 17분 (UTC 21:17)
+  workflow_dispatch: # GitHub 화면에서 직접 실행
+
+permissions:
+  contents: write
+
+concurrency:
+  group: blog-sync
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/fetch-blog.mjs
+      - name: 바뀐 것이 있으면 저장 (저장하면 Cloudflare가 자동 배포)
+        run: |
+          if git diff --quiet -- src/data/blog.json; then
+            echo "새 글이 없습니다."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "블로그 최신 글 목록 갱신" -- src/data/blog.json
+          git push

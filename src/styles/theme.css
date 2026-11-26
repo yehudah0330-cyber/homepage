@@ -237,6 +237,8 @@ html { scrollbar-color: var(--green) var(--bg); scroll-behavior: smooth; scroll-
 .doctor-teaser .photo.round { width: 11rem; border: 3px solid var(--gold); }
 .lead-quote { font-family: var(--serif); font-size: 1.25rem; line-height: 1.9; margin: 0 0 1.2rem; }
 
+.blog-head { margin-top: 3rem; }
+@media (max-width: 40rem) { .blog-list .entry-row { flex-direction: column; align-items: flex-start; gap: .2rem; } .blog-list .leader { display: none; } }
 .toc { border-top: 2px solid var(--ink); }
 .entry-row { display: flex; align-items: baseline; gap: .8rem; min-height: 3.6rem; padding: .9rem .2rem; border-bottom: 1px solid var(--line); text-decoration: none; }
 .entry-row h3 { font-family: var(--serif); font-size: 1.15rem; color: var(--green-dark); }
@@ -361,6 +363,17 @@ html { scrollbar-color: var(--green) var(--bg); scroll-behavior: smooth; scroll-
 .hero2 .today .dot { background: #5d8a4e; }
 .hero2 .today.lunch .dot, .hero2 .today.before .dot { background: #c18a2d; }
 .hero2 .today.closed .dot, .hero2 .today.after .dot { background: #b0564a; }
+/* 오늘 진료 상태: 첫 화면에서 가장 먼저 보이도록 크게 */
+.hero2 .today { margin: .4rem 0; padding: .9rem 1.2rem; gap: .75rem; border: 0; border-radius: 8px; background: var(--accent); color: #fff; font-size: 1.4rem; font-weight: 800; line-height: 1.4; word-break: keep-all; }
+.hero2 .today .dot { width: .85rem; height: .85rem; background: #cdeabb; }
+.hero2 .today.lunch, .hero2 .today.before { background: #ffe9ad; color: #553800; }
+.hero2 .today.lunch .dot, .hero2 .today.before .dot { background: #a86f10; }
+.hero2 .today.closed, .hero2 .today.after { background: #8f3426; color: #fff; }
+.hero2 .today.closed .dot, .hero2 .today.after .dot { background: #ffd0c6; }
+@media (min-width: 64rem) { .hero2 .today { font-size: 1.65rem; } }
+/* 좁은 화면: 첫 화면이 오른쪽으로 잘리지 않게 */
+.hero2-in > * { min-width: 0; }
+.hero2-text { grid-template-columns: minmax(0, 1fr); }
 .hero2 .hero-title { font-size: 1.9rem; line-height: 1.45; }
 .hero2 .hero-sub { color: var(--muted); font-size: 1rem; }
 .hero2-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 3px; display: block; }
@@ -438,3 +451,5 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outlin
 }
 
 .hero-name { margin: 0; }
+/* 다른 글자 크기 규칙보다 뒤에 있어야 적용됩니다 */
+@media (max-width: 40rem) { .hero2 .hero-name { font-size: min(2.6rem, 9vw); } .hero2 .today { font-size: min(1.4rem, 5.4vw); padding-inline: .9rem; gap: .55rem; } }

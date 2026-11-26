@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Photo } from '../components/ui'
 import { clinic } from '../config/clinic'
 import { api } from '../data/api'
+import blogPosts from '../data/blog.json'
 import type { Column, Notice } from '../data/types'
 import { DAY_NAMES } from '../lib/date'
 import { todayState, type TodayState } from '../lib/schedule'
@@ -104,6 +105,20 @@ export default function SiteHome() {
               </Link>
             ))}
             {columns.length === 0 && <p className="muted">곧 원장 칼럼이 올라옵니다.</p>}
+          </div>
+
+          <div className="sec-head blog-head">
+            <h2 className="sec-title">블로그 새 글</h2>
+            <a className="more-link" href="https://blog.naver.com/caccactus" target="_blank" rel="noreferrer">블로그 가기 <Icon name="arrow" /></a>
+          </div>
+          <div className="toc blog-list">
+            {blogPosts.map((p) => (
+              <a key={p.url} href={p.url} target="_blank" rel="noreferrer" className="entry-row">
+                <h3>{p.title}</h3>
+                <span className="leader" aria-hidden="true" />
+                <time dateTime={p.date}>{p.date.replace(/-/g, '.')}</time>
+              </a>
+            ))}
           </div>
         </div>
       </section>
