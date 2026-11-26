@@ -92,20 +92,22 @@ export default function SiteHome() {
 
       <section className="band">
         <div className="site-wrap">
-          <div className="sec-head">
-            <h2 className="sec-title">원장 칼럼</h2>
-            <Link className="more-link" to="/column">전체 보기 <Icon name="arrow" /></Link>
-          </div>
-          <div className="toc">
-            {columns.map((c) => (
-              <Link key={c.id} to={`/column/${c.id}`} className="entry-row">
-                <h3>{c.title}</h3>
-                <span className="leader" aria-hidden="true" />
-                <time dateTime={c.date}>{c.date.replace(/-/g, '.')}</time>
-              </Link>
-            ))}
-            {columns.length === 0 && <p className="muted">곧 원장 칼럼이 올라옵니다.</p>}
-          </div>
+          {/* 칼럼이 하나도 없으면 이 칸은 보이지 않습니다 */}
+          {columns.length > 0 && <>
+            <div className="sec-head">
+              <h2 className="sec-title">원장 칼럼</h2>
+              <Link className="more-link" to="/column">전체 보기 <Icon name="arrow" /></Link>
+            </div>
+            <div className="toc">
+              {columns.map((c) => (
+                <Link key={c.id} to={`/column/${c.id}`} className="entry-row">
+                  <h3>{c.title}</h3>
+                  <span className="leader" aria-hidden="true" />
+                  <time dateTime={c.date}>{c.date.replace(/-/g, '.')}</time>
+                </Link>
+              ))}
+            </div>
+          </>}
 
           <div className="sec-head blog-head">
             <h2 className="sec-title">블로그 새 글</h2>
