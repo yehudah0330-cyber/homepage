@@ -32,7 +32,7 @@ export function pages(): { url: string; title: string; description: string }[] {
     { url: '/', title: `${n} | 수원 영통구 망포 한의원 · 침 · 약침 · 한약 · 다이어트`, description: `${where} ${n}입니다. 침, 약침, 한약, 체중 관리 진료. 월·수·금 저녁 8시까지 야간진료. ${clinic.phone}` },
     { url: '/about/doctor', title: `의료진 소개 | ${n} 수원 영통구 한의원`, description: `${n} 의료진 소개와 진료 철학을 안내합니다.` },
     { url: '/about/hours', title: `진료시간 | ${n} 수원 영통구 한의원`, description: `${n} 진료시간. 월·수·금 저녁 8시까지 야간진료, 점심시간 12시 30분~2시. ${clinic.holidayNote}` },
-    { url: '/about/location', title: `오시는 길 | ${n} 수원 영통구 한의원`, description: `${n} 오시는 길. ${clinic.address}, 망포역 3번 출구에서 망포사거리 방향. 전화 ${clinic.phone}` },
+    { url: '/about/location', title: `오시는 길 | ${n} 수원 영통구 한의원`, description: `${n} 오시는 길. ${clinic.address}, 망포역 3번 출구에서 직진, 태장사거리. 전화 ${clinic.phone}` },
     ...clinic.services.map((s) => ({ url: `/treatment/${s.id}`, title: `${s.title} 안내 | ${n} 수원 영통구 한의원`, description: `${n}의 ${s.title}. ${s.summary}` })),
     { url: '/column', title: `원장 칼럼 | ${n} 수원 영통구 한의원`, description: `${n} 원장이 직접 쓰는 건강 이야기.` }
   ]

@@ -43,7 +43,7 @@ export const clinic = {
   // TODO 오시는 길 안내: 문장을 추가하면 홈페이지·앱에 자동으로 나타납니다. 비워 두면 숨겨집니다.
   directions: {
     parking: ['주차장이 있습니다. 내원하셔서 차번호를 말씀해 주시면 할인권을 제공해 드립니다.'] as string[],
-    subway: ['수인분당선 망포역 3번 출구에서 망포사거리 방향으로 오시면 됩니다. 한의원은 망포사거리에 있습니다.'] as string[],
+    subway: ['수인분당선 망포역 3번 출구로 나오셔서 그대로 직진해 태장사거리까지 오시면 됩니다. 한의원은 태장사거리에 있습니다.'] as string[],
     bus: [] as string[]
   },
   // image 에 '/images/acu.jpg' 처럼 public/images 안의 사진 경로를 넣으면 사진이 표시됩니다.

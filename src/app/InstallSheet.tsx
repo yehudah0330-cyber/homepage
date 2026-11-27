@@ -54,6 +54,7 @@ export default function InstallSheet() {
 
   if (!shown) return null
   const kakao = /KAKAOTALK/i.test(navigator.userAgent)
+  const samsung = /SamsungBrowser/i.test(navigator.userAgent)
 
   return (
     <div className="ap-sheet-back" onClick={(e) => e.target === e.currentTarget && close()}>
@@ -90,7 +91,14 @@ export default function InstallSheet() {
           </>
         )}
 
-        {state === 'manual' && (
+        {state === 'manual' && samsung && (
+          <ol>
+            <li><span>주소창의 <b>설치 아이콘</b>이 있으면 누르세요</span></li>
+            <li><span>없으면 아래의 <b>메뉴(≡)</b> → <b>현재 페이지 추가</b> → <b>홈 화면</b>을 누르세요</span></li>
+          </ol>
+        )}
+
+        {state === 'manual' && !samsung && (
           <ol>
             <li><span><b>크롬</b>에서 오른쪽 위 <b>점 세 개</b>를 누르세요</span></li>
             <li><span><b>앱 설치</b> 또는 <b>홈 화면에 추가</b>를 누르세요</span></li>

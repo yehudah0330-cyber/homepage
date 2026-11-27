@@ -63,8 +63,7 @@ export function InstallCard() {
         <details>
           <summary>설치 방법</summary>
           <ol>
-            <li><b>크롬</b>으로 이 화면을 엽니다.</li>
-            <li>오른쪽 위 <b>점 세 개</b>를 누릅니다.</li>
+            <li><b>크롬</b>은 오른쪽 위 <b>점 세 개</b>, <b>삼성 인터넷</b>은 아래 <b>메뉴(≡)</b>를 누릅니다.</li>
             <li><b>앱 설치</b> 또는 <b>홈 화면에 추가</b>를 누릅니다.</li>
           </ol>
         </details>
