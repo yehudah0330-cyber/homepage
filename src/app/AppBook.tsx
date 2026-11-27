@@ -101,7 +101,8 @@ export default function AppBook() {
           </>
         ) : (
           <>
-            <p>진료 종류, 날짜, 시간을 고르면 여기에 정리됩니다.</p>
+            <p>진료 종류, 날짜, 시간을 고르면 <b>예약 내용이 여기에 정리</b>됩니다.</p>
+            {clinic.kakaoChat && <a className="ap-btn kakao" href={clinic.kakaoChat} target="_blank" rel="noopener noreferrer">카카오톡으로 문의하기</a>}
             <a className="ap-btn line" href={tel}><Icon name="phone" />바로 전화하기</a>
           </>
         )}
