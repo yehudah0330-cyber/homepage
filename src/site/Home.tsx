@@ -76,6 +76,11 @@ export default function SiteHome() {
               <a className="cx-btn glass cx-magnet" href={tel}><Icon name="phone" />전화 {clinic.phone}</a>
             </div>
           </div>
+          {/* PC에서만: 휴대폰으로 찍어 예약 */}
+          <figure className="cx-qr">
+            <img src="/images/reserve-qr.svg" alt="진료 예약 화면으로 가는 QR 코드" width="148" height="148" />
+            <figcaption><b>휴대폰으로 예약</b>카메라로 찍으세요</figcaption>
+          </figure>
         </div>
 
         <div className="site-wrap cx-facts-wrap">

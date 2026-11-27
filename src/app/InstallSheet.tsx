@@ -28,7 +28,9 @@ export default function InstallSheet() {
   useEffect(() => {
     const forced = new URLSearchParams(window.location.search).get('install') === '1'
     const phone = window.matchMedia('(pointer: coarse)').matches
-    if (!forced && (!phone || closedBefore())) return
+    // 예약하러 온 사람(예약 QR 등)에게는 설치창으로 가리지 않습니다
+    const booking = window.location.pathname === '/reserve'
+    if (!forced && (!phone || booking || closedBefore())) return
     // 안드로이드의 설치 신호가 도착할 시간을 잠깐 기다립니다
     const t = setTimeout(() => setOpen(true), 1300)
     return () => clearTimeout(t)
