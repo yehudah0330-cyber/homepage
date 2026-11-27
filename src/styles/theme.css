@@ -589,3 +589,5 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outlin
 /* PC(마우스)에서는 문자 앱이 없어 문자 버튼을 숨깁니다 */
 @media (hover: hover) and (pointer: fine) { .adm-btns .adm-sms { display: none; } }
 .adm-jump { display: block; margin: -.3rem 0 .7rem auto; min-height: 2.5rem; }
+.adm-chat-pc { display: none; text-align: center; text-decoration: none; }
+@media (hover: hover) and (pointer: fine) { .adm-copied .adm-chat-pc { display: flex; align-items: center; justify-content: center; min-height: 2.75rem; font-size: .85rem; } .adm-copied .adm-chat-phone { display: none; } }

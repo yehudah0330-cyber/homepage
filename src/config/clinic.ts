@@ -12,6 +12,7 @@ export const clinic = {
   mapQuery: '수원시 영통구 태장로 84 망포프라자',
   // 카카오톡 채널 1:1 채팅 주소. 비워 두면 카톡 버튼이 숨겨집니다.
   kakaoChat: 'https://pf.kakao.com/_xiyxmvX/chat',
+  kakaoManager: 'https://center-pf.kakao.com/_xiyxmvX/chats', // 관리자용 채팅 목록 (카카오 로그인 필요)
   // 진료시간: 월·수·금 20시, 화·목 19시, 토 13시(점심 없음). 시작 09:30.
   // 요일별 진료시간 (0=일요일 … 6=토요일). null 이면 정기 휴진
   hours: [null, lateDay, midDay, lateDay, midDay, lateDay, { open: '09:30', close: '13:00' }] as DayHours[],

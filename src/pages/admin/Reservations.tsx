@@ -120,7 +120,13 @@ export default function Reservations() {
       {copied?.id === r.id + r.status && (
         <div className="adm-copied" role="status">
           {copied.ok
-            ? <p><b>"{KIND[r.status]}" 문구를 복사했습니다.</b> 카톡 대화방에 붙여넣어(Ctrl+V 또는 길게 누르기) 보내세요.</p>
+            ? (
+              <>
+                <p><b>"{KIND[r.status]}" 문구를 복사했습니다.</b> <b>한의원 채널 관리자</b>의 {r.name}님 대화방에 붙여넣어 보내세요.</p>
+                <a className="btn primary adm-chat-pc" href={clinic.kakaoManager} target="_blank" rel="noopener noreferrer">채널 관리자 채팅 열기</a>
+                <p className="adm-chat-phone">휴대폰은 <b>카카오비즈니스</b> 앱 → 채팅에서 여세요.</p>
+              </>
+            )
             : <><p>자동 복사가 안 됐습니다. 아래 글을 직접 복사해 주세요.</p><textarea readOnly rows={8} value={notice(r)} onFocus={(e) => e.target.select()} /></>}
         </div>
       )}
