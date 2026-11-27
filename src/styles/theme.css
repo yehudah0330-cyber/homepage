@@ -572,3 +572,10 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outlin
 .res-wide .cal-dow { font-size: min(.75rem, 2.2vh); }
 .res-wide .cal-wrap { min-height: min(23rem, 380px); }
 .shell.admin:has(.res-wide) .tabs a, .shell.admin:has(.res-wide) .back, .shell.admin:has(.res-wide) .top .brand, .res-wide .adm-top .btn, .res-wide .adm-view button { font-size: min(1rem, 2.6vh); }
+
+/* 안내 문구 복사 */
+.adm-btns .btn.kakao { background: #fee500; border-color: #fee500; color: #191600; }
+.adm-copied { display: grid; gap: .3rem; padding: .6rem; border-radius: 8px; background: #e5f2e4; font-size: .85rem; }
+.adm-copied textarea { width: 100%; font: inherit; }
+/* PC(마우스)에서는 문자 앱이 없어 문자 버튼을 숨깁니다 */
+@media (hover: hover) and (pointer: fine) { .adm-btns .adm-sms { display: none; } }

@@ -59,10 +59,15 @@ export default function AppBook() {
   const ready = picked && date && time && slots.includes(time)
   const message = ready ? `[${clinic.name} 예약 요청]\n날짜: ${prettyDate(date)}\n시간: ${prettyTime(time)}\n진료: ${picked.title}\n성함: ` : ''
   const reset = () => { setCopied(false); setErr(''); setDone(null) }
+  // 신청한 뒤 카톡 채널에 보내는 글: 병원에 알림이 가고, 그 대화방으로 답을 받습니다.
+  const request = done ? `[예약 신청]
+이름: ${done.name}
+일시: ${prettyDate(done.date)} ${prettyTime(done.time)}
+확정 안내 부탁드립니다.` : ''
 
-  const copy = async () => {
+  const copy = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(message)
+      await navigator.clipboard.writeText(text)
       setCopied(true)
     } catch {
       setCopied(false)
@@ -79,6 +84,7 @@ export default function AppBook() {
     try {
       const r = await booking.request({ name: name.trim(), phone: normPhone(phone), date, time, service: picked.title })
       setMe({ name: name.trim(), phone: normPhone(phone) })
+      setCopied(false)
       setDone(r)
       setTime('')
       loadMine()
@@ -144,6 +150,18 @@ export default function AppBook() {
             <p className="ap-sum-when">예약 신청이 접수되었습니다</p>
             <p>{prettyDate(done.date)} {prettyTime(done.time)}</p>
             <p><b>병원에서 확인한 뒤 확정</b>됩니다. 아래 "내 예약"에서 확인하실 수 있고, 시간을 조정해야 하면 연락드립니다.</p>
+            {clinic.kakaoChat && (
+              <>
+                <a className="ap-btn kakao" href={clinic.kakaoChat} target="_blank" rel="noopener noreferrer" onClick={() => copy(request)}>카톡으로 확정 안내 받기</a>
+                <ol className="ap-how">
+                  <li>위 버튼을 누르면 <b>신청 내용이 복사</b>되고 병원 채팅창이 열립니다.</li>
+                  <li>입력칸을 <b>길게 눌러 붙여넣기</b>(PC는 Ctrl+V)를 하세요.</li>
+                  <li><b>보내기</b>를 누르면 그 대화방으로 답을 드립니다.</li>
+                </ol>
+                {copied && <p className="ap-copied" role="status">신청 내용을 복사했습니다.</p>}
+                <details className="ap-msg"><summary>복사되는 내용 보기</summary><pre>{request}</pre></details>
+              </>
+            )}
           </div>
         )}
         {ready ? (
@@ -164,7 +182,7 @@ export default function AppBook() {
                 <p><b>아직 예약이 확정되지 않았습니다.</b> 병원의 답을 받으면 확정됩니다.</p>
                 {clinic.kakaoChat && (
                   <>
-                    <a className="ap-btn kakao" href={clinic.kakaoChat} target="_blank" rel="noopener noreferrer" onClick={copy}>카카오톡으로 보내기</a>
+                    <a className="ap-btn kakao" href={clinic.kakaoChat} target="_blank" rel="noopener noreferrer" onClick={() => copy(message)}>카카오톡으로 보내기</a>
                     <ol className="ap-how">
                       <li>위 버튼을 누르면 <b>예약 내용이 복사</b>되고 병원 채팅창이 열립니다.</li>
                       <li>입력칸을 <b>길게 눌러 붙여넣기</b>를 하세요.</li>

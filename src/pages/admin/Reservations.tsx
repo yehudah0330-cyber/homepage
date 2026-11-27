@@ -7,12 +7,18 @@ import type { Reservation } from '../../data/types'
 import { DAY_NAMES, fromISO, normPhone, prettyDate, prettyPhone, prettyTime, toISO, todayISO } from '../../lib/date'
 import { daySlots } from '../../lib/schedule'
 
-const smsText = (r: Reservation) => {
+// 환자에게 보내는 안내 문구 (카톡 붙여넣기와 문자에 같이 씁니다)
+const KIND = { confirmed: '예약 확정', pending: '시간 조정 안내', cancelled: '예약 취소' } as const
+const notice = (r: Reservation) => {
   const when = `${prettyDate(r.date)} ${prettyTime(r.time)}`
-  if (r.status === 'confirmed') return `[${clinic.name}] ${r.name}님, ${when} 예약이 확정되었습니다. 변경은 ${clinic.phone}`
-  if (r.status === 'cancelled') return `[${clinic.name}] ${r.name}님, ${when} 예약이 어렵게 되어 취소되었습니다. 다른 시간은 ${clinic.phone}`
-  return `[${clinic.name}] ${r.name}님, 신청하신 ${when}은 예약이 많아 다른 시간을 안내드립니다. 가능한 시간: `
+  const lines = {
+    confirmed: [`${r.name}님, 예약이 확정되었습니다.`, '', `■ 일시: ${when}`, '■ 위치: 망포프라자 2층 (태장사거리)', `■ 변경·취소: ${clinic.phone}`, '', '감사합니다.'],
+    pending: [`${r.name}님, 신청하신 ${when}은`, '예약이 많아 다른 시간을 안내드립니다.', '', '■ 가능한 시간: ', '', '편하신 시간을 답장해 주세요.', `문의: ${clinic.phone}`],
+    cancelled: [`${r.name}님, ${when} 예약이 취소되었습니다.`, '', `다시 예약하시려면 ${clinic.phone}로 연락 주세요.`, '감사합니다.']
+  }[r.status]
+  return [`[${clinic.name}]`, ...lines].join('\n')
 }
+
 // 넓은 PC 화면에서는 왼쪽 달력, 오른쪽 예약 내용. 화면 크기가 바뀌면 다시 맞춥니다.
 function useViewport() {
   const read = () => ({ wide: window.matchMedia('(min-width: 1100px)').matches, height: window.innerHeight })
@@ -49,6 +55,7 @@ export default function Reservations() {
   const [time, setTime] = useState('')
   const [adding, setAdding] = useState(false)
   const [form, setForm] = useState({ name: '', phone: '', date: todayISO(), time: '10:00', service: '' })
+  const [copied, setCopied] = useState<{ id: string; ok: boolean } | null>(null)
   const dayRef = useRef<HTMLElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -73,6 +80,11 @@ export default function Reservations() {
     }
   }
 
+  const copy = async (r: Reservation) => {
+    const ok = await navigator.clipboard.writeText(notice(r)).then(() => true, () => false)
+    setCopied({ id: r.id + r.status, ok })
+  }
+
   const list = [...(all ?? [])].sort(byTime)
   const coming = list.filter((r) => r.date >= todayISO())
   const waiting = coming.filter((r) => r.status === 'pending')
@@ -94,8 +106,16 @@ export default function Reservations() {
         {r.status !== 'confirmed' && <button type="button" className="btn primary" onClick={() => run(() => booking.update(r.id, { status: 'confirmed' }))}>확정</button>}
         <button type="button" className="btn ghost" onClick={() => { setEdit(edit === r.id ? '' : r.id); setDate(r.date); setTime(r.time) }}>시간 변경</button>
         {r.status !== 'cancelled' && <button type="button" className="btn ghost" onClick={() => { if (window.confirm(`${r.name}님 예약을 취소할까요?`)) run(() => booking.update(r.id, { status: 'cancelled' })) }}>취소</button>}
-        {r.phone && <a className="btn ghost" href={`sms:${r.phone}?body=${encodeURIComponent(smsText(r))}`}>문자 보내기</a>}
+        <button type="button" className="btn kakao" onClick={() => copy(r)}>카톡 문구 복사</button>
+        {r.phone && <a className="btn ghost adm-sms" href={`sms:${r.phone}?body=${encodeURIComponent(notice(r))}`}>문자 보내기</a>}
       </div>
+      {copied?.id === r.id + r.status && (
+        <div className="adm-copied" role="status">
+          {copied.ok
+            ? <p><b>"{KIND[r.status]}" 문구를 복사했습니다.</b> 카톡 대화방에 붙여넣어(Ctrl+V 또는 길게 누르기) 보내세요.</p>
+            : <><p>자동 복사가 안 됐습니다. 아래 글을 직접 복사해 주세요.</p><textarea readOnly rows={8} value={notice(r)} onFocus={(e) => e.target.select()} /></>}
+        </div>
+      )}
       {edit === r.id && (
         <div className="adm-edit">
           <input type="date" aria-label="새 날짜" value={date} onChange={(e) => setDate(e.target.value)} />

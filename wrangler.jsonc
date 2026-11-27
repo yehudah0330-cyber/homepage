@@ -16,7 +16,7 @@
   "triggers": { "crons": ["0 18 * * *"] },
   "vars": {
     // 환자 온라인 예약: "on" 이면 받습니다
-    "BOOKING_OPEN": "off",
+    "BOOKING_OPEN": "on",
     "ACCESS_TEAM_DOMAIN": "",
     "ACCESS_AUD": ""
   }
