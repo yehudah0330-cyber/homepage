@@ -6,4 +6,5 @@ naver-blog-tool/
 skills-lock.json
 
 .wrangler/
+.dev.vars
 dist-server/

@@ -12,7 +12,11 @@
   "d1_databases": [
     { "binding": "DB", "database_name": "bubuhani-db", "database_id": "f9659050-89c0-490b-bde0-cd06f0da91ea" }
   ],
+  // 매일 새벽 3시(한국 시간): 보관 기간이 지난 예약 삭제
+  "triggers": { "crons": ["0 18 * * *"] },
   "vars": {
+    // 환자 온라인 예약: "on" 이면 받습니다
+    "BOOKING_OPEN": "off",
     "ACCESS_TEAM_DOMAIN": "",
     "ACCESS_AUD": ""
   }

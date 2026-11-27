@@ -5,7 +5,8 @@ export type Reservation = {
   phone: string // 숫자만
   date: string // YYYY-MM-DD
   time: string // HH:mm
-  status: 'confirmed' | 'cancelled'
+  status: 'pending' | 'confirmed' | 'cancelled' // pending: 신청 접수, 확인 전
+  service?: string
   createdAt: string
   nextCare?: NextCare
 }

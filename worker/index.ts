@@ -1,17 +1,19 @@
 /**
  * 신영통부부한의원 서버 (Cloudflare Worker + D1)
  * - /api/* 는 아래 코드가, 화면 요청은 pages.ts 가 처리합니다. (/assets, /images 파일은 코드를 거치지 않음)
- * - /api/admin/* 는 Cloudflare Access 가 붙여 주는 로그인 증명(JWT)을 검증한 뒤에만 열립니다.
- *   설정(ACCESS_TEAM_DOMAIN, ACCESS_AUD)이 비어 있으면 관리자 기능은 닫혀 있습니다.
+ * - /api/admin/* 는 비밀번호 로그인(auth.ts) 또는 Cloudflare Access 를 확인한 뒤에만 열립니다.
+ *   둘 다 설정되지 않았으면 관리자 기능은 닫혀 있습니다.
+ * - 환자 예약은 BOOKING_OPEN 이 "on" 일 때만 받습니다. 닫혀 있을 때는 로그인한 직원만 시험할 수 있습니다.
  */
 import { clinic } from '../src/config/clinic'
 import { daySlots } from '../src/lib/schedule'
 import { pageRequest, redirect } from './pages'
+import { hasSession, login, logoutAll, logoutCookie, passwordReady } from './auth'
 
 // ── 최소 타입 (외부 타입 패키지 없이 사용) ──
 type Stmt = { bind: (...v: unknown[]) => Stmt; first: <T = Record<string, unknown>>() => Promise<T | null>; all: <T = Record<string, unknown>>() => Promise<{ results: T[] }>; run: () => Promise<unknown> }
 type D1 = { prepare: (q: string) => Stmt; batch: (s: Stmt[]) => Promise<unknown> }
-type Env = { DB: D1; ASSETS: { fetch: (r: Request) => Promise<Response> }; ACCESS_TEAM_DOMAIN?: string; ACCESS_AUD?: string }
+type Env = { DB: D1; ASSETS: { fetch: (r: Request) => Promise<Response> }; ACCESS_TEAM_DOMAIN?: string; ACCESS_AUD?: string; ADMIN_PASSWORD?: string; BOOKING_OPEN?: string }
 
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } })
 const fail = (msg: string, status = 400) => json({ error: msg }, status)
@@ -45,8 +47,12 @@ function ensureSchema(db: D1) {
       db.prepare('CREATE TABLE IF NOT EXISTS columns (id TEXT PRIMARY KEY, title TEXT NOT NULL, body TEXT NOT NULL, date TEXT NOT NULL, created_at TEXT NOT NULL)'),
       db.prepare('CREATE TABLE IF NOT EXISTS notify_off (phone TEXT PRIMARY KEY)'),
       db.prepare('CREATE TABLE IF NOT EXISTS outbox (id TEXT PRIMARY KEY, key TEXT NOT NULL, kind TEXT NOT NULL, to_phone TEXT NOT NULL, channel TEXT NOT NULL, text TEXT NOT NULL, at TEXT NOT NULL, status TEXT NOT NULL)'),
-      db.prepare('CREATE TABLE IF NOT EXISTS hits (ip TEXT NOT NULL, at INTEGER NOT NULL)')
+      db.prepare('CREATE TABLE IF NOT EXISTS hits (ip TEXT NOT NULL, at INTEGER NOT NULL)'),
+      db.prepare('CREATE TABLE IF NOT EXISTS admin_state (k TEXT PRIMARY KEY, v TEXT NOT NULL)'),
+      db.prepare('CREATE TABLE IF NOT EXISTS login_fails (ip TEXT NOT NULL, at INTEGER NOT NULL)')
     ])
+    // 진료 항목 칸 추가 (이미 있으면 넘어갑니다)
+    .then(() => db.prepare('ALTER TABLE reservations ADD COLUMN service TEXT').run().catch(() => undefined))
     .then(() => undefined)
   return ready
 }
@@ -96,9 +102,10 @@ async function limited(db: D1, req: Request): Promise<boolean> {
 }
 
 // ── 변환 ──
-type ResRow = { id: string; name: string; phone: string; date: string; time: string; status: string; created_at: string; care_label: string | null; care_end: string | null }
+type ResRow = { id: string; name: string; phone: string; date: string; time: string; status: string; created_at: string; care_label: string | null; care_end: string | null; service?: string | null }
 const toRes = (r: ResRow) => ({
   id: r.id, name: r.name, phone: r.phone, date: r.date, time: r.time, status: r.status, createdAt: r.created_at,
+  ...(r.service ? { service: r.service } : {}),
   ...(r.care_label && r.care_end ? { nextCare: { label: r.care_label, endDate: r.care_end } } : {})
 })
 const uid = () => crypto.randomUUID().replace(/-/g, '').slice(0, 16)
@@ -120,11 +127,21 @@ async function slotError(db: D1, date: string, time: string, ignoreId?: string):
   if (date < today || date > addDaysISO(today, clinic.bookingDays)) return '예약할 수 없는 날짜예요.'
   if ((await db.prepare('SELECT 1 AS x FROM closed_days WHERE date=?').bind(date).first()) ) return '그날은 쉬는 날이에요.'
   if (!daySlots(date).includes(time)) return '예약할 수 없는 시간이에요.'
-  if ((await used(db, date, time, ignoreId)) >= clinic.capacityPerSlot) return '방금 다른 분이 예약하셨어요. 다른 시간을 골라 주세요.'
+  // 신청은 정원(clinic.capacityPerSlot)을 넘어도 받고 관리자 화면에 "몰림"으로 보여 줍니다. 장난 신청을 막는 상한만 둡니다.
+  const r = await db.prepare("SELECT COUNT(*) AS n FROM reservations WHERE status<>'cancelled' AND date=? AND time=? AND id<>?").bind(date, time, ignoreId ?? '').first<{ n: number }>()
+  if ((r?.n ?? 0) >= clinic.capacityPerSlot * 4) return '그 시간은 마감됐어요. 다른 시간을 골라 주세요.'
   return null
 }
 
+// ── 보관 기간: 예약일이 지난 지 3개월(92일)이 넘으면 지웁니다 ──
+const purge = (db: D1) => db.prepare('DELETE FROM reservations WHERE date < ?').bind(addDaysISO(kstParts(), -92)).run()
+const serviceName = (v: unknown) => clinic.services.find((s) => s.title === v)?.title ?? null
+
 export default {
+  async scheduled(_event: unknown, env: Env): Promise<void> {
+    await ensureSchema(env.DB)
+    await purge(env.DB)
+  },
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url)
     const moved = redirect(url)
@@ -148,8 +165,35 @@ async function route(req: Request, env: Env, url: URL): Promise<Response> {
   const [a, b, c] = parts
 
   // 쓰기 요청은 접속지당 횟수 제한 (관리자 제외)
+  const ip = req.headers.get('CF-Connecting-IP') ?? 'unknown'
+  const staff = () => Promise.all([hasSession(req, env), isAdmin(req, env)]).then(([x, y]) => x || y)
+  // 다른 사이트에서 보낸 쓰기 요청은 거절
+  const origin = req.headers.get('Origin')
+  if (m !== 'GET' && origin && new URL(origin).host !== url.host) return fail('허용되지 않은 요청이에요.', 403)
+
+  if (a === 'login' && m === 'POST') {
+    const body = await readJson<{ password?: string; remember?: boolean }>(req)
+    const r = await login(env, ip, String(body?.password ?? '').slice(0, 200), body?.remember !== false)
+    if (r.error) return fail(r.error, r.status)
+    const res = json({ ok: true })
+    res.headers.append('Set-Cookie', r.cookie!)
+    return res
+  }
+  if (a === 'logout' && m === 'POST') {
+    const res = json({ ok: true })
+    res.headers.append('Set-Cookie', logoutCookie())
+    return res
+  }
+  if (a === 'session' && m === 'GET') return json({ admin: await staff(), ready: passwordReady(env) })
+  if (a === 'booking-status' && m === 'GET') {
+    const open = env.BOOKING_OPEN === 'on'
+    return json({ open, preview: !open && (await staff()) })
+  }
+
   const admin = a === 'admin'
-  if (admin && !(await isAdmin(req, env))) return fail('관리자 로그인이 필요해요.', 403)
+  if (admin && !(await staff())) return fail('관리자 로그인이 필요해요.', 403)
+  // 이름·전화번호로 예약을 찾는 요청도 횟수를 제한합니다
+  if (a === 'reservations' && b === 'lookup' && (await limited(db, req))) return fail('요청이 너무 많아요. 잠시 후 다시 시도해 주세요.', 429)
   if (!admin && m !== 'GET' && (await limited(db, req))) return fail('요청이 너무 많아요. 잠시 후 다시 시도해 주세요.', 429)
 
   // ───── 공개 ─────
@@ -168,18 +212,22 @@ async function route(req: Request, env: Env, url: URL): Promise<Response> {
     return json(out)
   }
   if (a === 'reservations' && !b && m === 'POST') {
-    const body = await readJson<{ name?: string; phone?: string; date?: string; time?: string }>(req)
+    if (env.BOOKING_OPEN !== 'on' && !(await staff())) return fail('지금은 온라인 예약을 받지 않아요. 전화로 문의해 주세요.', 403)
+    const body = await readJson<{ name?: string; phone?: string; date?: string; time?: string; service?: string }>(req)
     const name = str(body?.name, 30)
     const phone = normPhone(body?.phone)
     if (!name) return fail('이름을 입력해 주세요.')
     if (!validPhone(phone)) return fail('전화번호를 확인해 주세요.')
     if (!isISO(body?.date) || !isTime(body?.time)) return fail('날짜와 시간을 확인해 주세요.')
-    const pending = await db.prepare("SELECT COUNT(*) AS n FROM reservations WHERE phone=? AND status='confirmed' AND date>=?").bind(phone, kstParts()).first<{ n: number }>()
+    const pending = await db.prepare("SELECT COUNT(*) AS n FROM reservations WHERE phone=? AND status<>'cancelled' AND date>=?").bind(phone, kstParts()).first<{ n: number }>()
     if ((pending?.n ?? 0) >= 5) return fail('예정된 예약이 너무 많아요. 전화로 문의해 주세요.')
     const err = await slotError(db, body.date, body.time)
     if (err) return fail(err, 409)
-    const row: ResRow = { id: uid(), name, phone, date: body.date, time: body.time, status: 'confirmed', created_at: new Date().toISOString(), care_label: null, care_end: null }
-    await db.prepare('INSERT INTO reservations (id,name,phone,date,time,status,created_at) VALUES (?,?,?,?,?,?,?)').bind(row.id, name, phone, row.date, row.time, 'confirmed', row.created_at).run()
+    const dup = await db.prepare("SELECT 1 AS x FROM reservations WHERE phone=? AND date=? AND time=? AND status<>'cancelled'").bind(phone, body.date, body.time).first()
+    if (dup) return fail('이미 같은 시간에 신청하셨어요.', 409)
+    const row: ResRow = { id: uid(), name, phone, date: body.date, time: body.time, status: 'pending', created_at: new Date().toISOString(), care_label: null, care_end: null, service: serviceName(body.service) }
+    await db.prepare('INSERT INTO reservations (id,name,phone,date,time,status,created_at,service) VALUES (?,?,?,?,?,?,?,?)').bind(row.id, name, phone, row.date, row.time, row.status, row.created_at, row.service).run()
+    await purge(db)
     return json(toRes(row))
   }
   if (a === 'reservations' && b === 'lookup' && m === 'GET') {
@@ -202,8 +250,8 @@ async function route(req: Request, env: Env, url: URL): Promise<Response> {
     if (!r) return fail('예약을 찾을 수 없어요.', 404)
     const err = await slotError(db, body.date, body.time, b)
     if (err) return fail(err, 409)
-    await db.prepare("UPDATE reservations SET date=?, time=?, status='confirmed' WHERE id=?").bind(body.date, body.time, b).run()
-    return json(toRes({ ...r, date: body.date, time: body.time, status: 'confirmed' }))
+    await db.prepare("UPDATE reservations SET date=?, time=?, status='pending' WHERE id=?").bind(body.date, body.time, b).run()
+    return json(toRes({ ...r, date: body.date, time: body.time, status: 'pending' }))
   }
   if (a === 'notices' && m === 'GET') {
     const rows = (await db.prepare('SELECT * FROM notices ORDER BY created_at DESC LIMIT 20').all<{ id: string; text: string; created_at: string }>()).results
@@ -238,7 +286,35 @@ async function route(req: Request, env: Env, url: URL): Promise<Response> {
   // ───── 관리자 (Cloudflare Access 로그인 필요) ─────
   if (admin) {
     const [, x, y, z] = parts
+    if (x === 'logout-all' && m === 'POST') {
+      await logoutAll(db)
+      const res = json({ ok: true })
+      res.headers.append('Set-Cookie', logoutCookie())
+      return res
+    }
+    // 직원이 직접 추가 (전화·방문 예약). 시간 제한 없이 바로 확정
+    if (x === 'reservations' && !y && m === 'POST') {
+      const body = await readJson<{ name?: string; phone?: string; date?: string; time?: string; service?: string }>(req)
+      const name = str(body?.name, 30)
+      if (!name) return fail('이름을 입력해 주세요.')
+      if (!isISO(body?.date) || !isTime(body?.time)) return fail('날짜와 시간을 확인해 주세요.')
+      await db.prepare('INSERT INTO reservations (id,name,phone,date,time,status,created_at,service) VALUES (?,?,?,?,?,?,?,?)')
+        .bind(uid(), name, normPhone(body.phone).slice(0, 11), body.date, body.time, 'confirmed', new Date().toISOString(), serviceName(body.service)).run()
+      return json({ ok: true })
+    }
+    // 확정, 취소, 시간 변경
+    if (x === 'reservations' && y && !z && m === 'PATCH') {
+      const body = await readJson<{ status?: string; date?: string; time?: string }>(req)
+      const r = await db.prepare('SELECT * FROM reservations WHERE id=?').bind(y).first<ResRow>()
+      if (!r) return fail('예약을 찾을 수 없어요.', 404)
+      const status = ['pending', 'confirmed', 'cancelled'].includes(body?.status ?? '') ? body!.status! : r.status
+      const date = isISO(body?.date) ? body.date : r.date
+      const time = isTime(body?.time) ? body.time : r.time
+      await db.prepare('UPDATE reservations SET status=?, date=?, time=? WHERE id=?').bind(status, date, time, y).run()
+      return json(toRes({ ...r, status, date, time }))
+    }
     if (x === 'reservations' && !y && m === 'GET') {
+      await purge(db)
       const rows = (await db.prepare('SELECT * FROM reservations ORDER BY date, time').all<ResRow>()).results
       return json(rows.map(toRes))
     }

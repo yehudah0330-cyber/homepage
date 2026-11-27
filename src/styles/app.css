@@ -187,3 +187,27 @@
 .ap-copied { font-weight: 700; color: #2e6a47; }
 .ap-msg summary { min-height: 2.4rem; display: flex; align-items: center; cursor: pointer; text-decoration: underline; color: var(--soft); font-size: .8rem; }
 .ap-msg pre { margin: 0; padding: .7rem .8rem; border-radius: .8rem; background: #f1e9d6; font: inherit; white-space: pre-wrap; user-select: all; }
+
+/* 온라인 예약 신청 */
+.ap-slots button small { display: block; font-size: .62rem; color: #9a4a12; font-weight: 700; }
+.ap-slots button[aria-pressed='true'] small { color: #ffe3a8; }
+.ap-field { display: grid; gap: .25rem; font-weight: 700; font-size: min(.9rem, 4.8vw); }
+.ap-field input { width: 100%; min-width: 0; min-height: 3rem; padding: .4rem .8rem; border: 1px solid var(--line); border-radius: .8rem; background: #fff; font: inherit; font-size: min(1rem, 5vw); }
+.ap-agree { display: flex; align-items: flex-start; gap: .55rem; min-height: 2.75rem; font-size: min(.85rem, 4.5vw); }
+.ap-agree input { width: 1.3rem; height: 1.3rem; flex: none; margin-top: .1rem; }
+.ap .ap-go { min-height: 3.4rem; font-size: min(1.1rem, 5.5vw); }
+.ap-err { color: #8f3426; font-weight: 700; }
+.ap-done { display: grid; gap: .35rem; padding: .8rem; border-radius: 1rem; background: #e5f2e4; }
+.ap-ask { justify-self: center; min-height: 2.75rem; display: inline-flex; align-items: center; font-size: .8rem; color: var(--soft) !important; }
+.ap-mine { display: grid; gap: .2rem; padding: .6rem 0; border-bottom: 1px solid var(--line); }
+.ap-mine span { margin-left: .4rem; padding: .05rem .55rem; border-radius: 999px; font-size: .7rem; font-weight: 700; background: #ffe3a8; color: #4a2f00; }
+.ap-mine.confirmed span { background: #cfe9cd; color: #1f5233; }
+.ap-mine.cancelled { opacity: .6; }
+.ap-mine.cancelled span { background: #eee; color: #555; }
+.ap-mine button { justify-self: start; min-height: 2.5rem; padding: 0; border: 0; background: none; text-decoration: underline; color: var(--soft); font-size: .8rem; }
+/* 개인정보 안내: 큰 글씨에서 넘치지 않게 */
+.privacy, .shell .main { min-width: 0; overflow-wrap: anywhere; }
+.shell .h1 { word-break: keep-all; overflow-wrap: anywhere; }
+.shell .top { flex-wrap: wrap; }
+.shell .top .brand { min-width: 0; font-size: min(1.05rem, 5.5vw); }
+.shell.admin .top .brand { font-size: min(1.2rem, 5.8vw); }

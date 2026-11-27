@@ -454,3 +454,20 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outlin
 .hero-name { margin: 0; }
 /* 다른 글자 크기 규칙보다 뒤에 있어야 적용됩니다 */
 @media (max-width: 40rem) { .hero2 .hero-name { font-size: min(2.6rem, 9vw); } .hero2 .today { font-size: min(1.4rem, 5.4vw); padding-inline: .9rem; gap: .55rem; } }
+
+/* 관리자 예약 현황 */
+.adm-top { display: flex; gap: .5rem; margin-bottom: .6rem; }
+.adm-h { font-size: 1.15rem; margin: 1.2rem 0 .5rem; cursor: default; }
+.adm-day { font-size: 1rem; margin: .9rem 0 .4rem; }
+.adm-card { display: grid; gap: .35rem; margin-bottom: .6rem; padding: .8rem; border: 1px solid var(--line); border-left: 6px solid var(--line); border-radius: 12px; background: var(--card); }
+.adm-card p { margin: 0; }
+.adm-card.pending { border-left-color: #e0a020; }
+.adm-card.confirmed { border-left-color: #3e7d52; }
+.adm-card.cancelled { opacity: .6; }
+.adm-busy { margin-left: .5rem; padding: .05rem .5rem; border-radius: 999px; background: #a33a2c; color: #fff; font-size: .75rem; font-weight: 700; }
+.adm-btns { display: grid; grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr)); gap: .4rem; }
+.adm-btns .btn, .adm-edit .btn { min-height: 2.75rem; font-size: .85rem; width: auto; }
+.adm-edit { display: grid; gap: .4rem; }
+.adm-card input, .adm-card select { min-height: 2.75rem; padding: 0 .6rem; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; min-width: 0; }
+.adm-check { display: flex; gap: .5rem; align-items: flex-start; margin: .6rem 0; font-size: .85rem; }
+.adm-check input { width: 1.2rem; height: 1.2rem; flex: none; }
