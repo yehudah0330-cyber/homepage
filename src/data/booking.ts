@@ -16,6 +16,7 @@ export const booking = {
   request: (input: Input) => call<Reservation>('/api/reservations', 'POST', input),
   mine: (name: string, phone: string) => call<Reservation[]>(`/api/reservations/lookup?${new URLSearchParams({ name, phone })}`),
   cancel: (id: string) => call<Reservation>(`/api/reservations/${id}/cancel`, 'POST'),
+  closedDays: () => call<Record<string, string>>('/api/closed-days'),
   session: () => call<{ admin: boolean; ready: boolean }>('/api/session'),
   login: (password: string, remember: boolean) => call('/api/login', 'POST', { password, remember }),
   logout: () => call('/api/logout', 'POST'),
