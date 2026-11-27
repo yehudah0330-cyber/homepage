@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { Icon } from '../site/Icon'
 import { useInstall } from './install'
+import InstallSheet from './InstallSheet'
 
 const TABS = [
   { to: '/app', label: '홈', icon: 'home' },
@@ -18,6 +19,7 @@ export default function AppShell() {
       <div className="ap-page" key={pathname}>
         <Outlet />
       </div>
+      <InstallSheet />
       <nav className="ap-tabs" aria-label="앱 메뉴">
         {TABS.map((t) => (
           <NavLink key={t.to} to={t.to} end>
