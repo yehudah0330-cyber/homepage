@@ -1,7 +1,7 @@
 // 예약
 // - 온라인 예약이 열려 있으면: 이름·전화번호를 넣고 "예약 신청" → 병원이 확인해 확정합니다.
 // - 닫혀 있으면: 카카오톡 채팅이나 전화로 신청합니다. (로그인한 직원에게는 시험용 신청 화면이 보입니다)
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { PrivacyText } from '../components/ui'
 import { clinic } from '../config/clinic'
@@ -65,6 +65,9 @@ export default function AppBook() {
 일시: ${prettyDate(done.date)} ${prettyTime(done.time)}
 확정 안내 부탁드립니다.` : ''
 
+  // 신청이 끝나면 안내가 바로 보이도록 옮겨 줍니다
+  const doneRef = useRef<HTMLDivElement>(null)
+  useEffect(() => { if (done) doneRef.current?.scrollIntoView({ block: 'start' }) }, [done])
   const copy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text)
@@ -146,18 +149,22 @@ export default function AppBook() {
 
       <section className="ap-summary" aria-live="polite">
         {done && (
-          <div className="ap-done" role="status">
+          <div className="ap-done" role="status" ref={doneRef}>
             <p className="ap-sum-when">예약 신청이 접수되었습니다</p>
             <p>{prettyDate(done.date)} {prettyTime(done.time)}</p>
             <p><b>병원에서 확인한 뒤 확정</b>됩니다. 아래 "내 예약"에서 확인하실 수 있고, 시간을 조정해야 하면 연락드립니다.</p>
             {clinic.kakaoChat && (
               <>
+                {/* 카톡창이 열리면 이 화면이 가려지므로, 버튼보다 먼저 크게 알려 줍니다 */}
+                <div className="ap-last">
+                  <p className="ap-last-title">카톡으로 안내받으려면<br />꼭 <em>보내기</em>까지 해 주세요</p>
+                  <ol>
+                    <li><i>1</i><span>아래 <b>노란 버튼</b> 누르기</span></li>
+                    <li className="key"><i>2</i><span>입력칸을 <b>길게 눌러 붙여넣기</b><small>PC는 입력칸에서 Ctrl+V</small></span></li>
+                    <li className="key"><i>3</i><span><b>보내기</b> 누르기</span></li>
+                  </ol>
+                </div>
                 <a className="ap-btn kakao" href={clinic.kakaoChat} target="_blank" rel="noopener noreferrer" onClick={() => copy(request)}>카톡으로 확정 안내 받기</a>
-                <ol className="ap-how">
-                  <li>위 버튼을 누르면 <b>신청 내용이 복사</b>되고 병원 채팅창이 열립니다.</li>
-                  <li>입력칸을 <b>길게 눌러 붙여넣기</b>(PC는 Ctrl+V)를 하세요.</li>
-                  <li><b>보내기</b>를 누르면 그 대화방으로 답을 드립니다.</li>
-                </ol>
                 {copied && <p className="ap-copied" role="status">신청 내용을 복사했습니다.</p>}
                 <details className="ap-msg"><summary>복사되는 내용 보기</summary><pre>{request}</pre></details>
               </>
