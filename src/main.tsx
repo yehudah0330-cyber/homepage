@@ -3,15 +3,16 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
 import './styles/theme.css'
 import './styles/cinema.css'
+import './styles/app.css'
+import AppShell from './app/AppShell'
+import AppHome from './app/AppHome'
+import AppCare from './app/AppCare'
+import AppBook from './app/AppBook'
+import AppInfo from './app/AppInfo'
 import { applyFontStep, getFontStep } from './lib/prefs'
-import Home from './pages/Home'
 import SiteLayout from './site/SiteLayout'
 import SiteHome from './site/Home'
 import { ColumnList, ColumnView, DoctorPage, HoursPage, LocationPage, Treatment } from './site/Pages'
-import Reserve from './pages/Reserve'
-import Directions from './pages/Directions'
-import Hours from './pages/Hours'
-import Care from './pages/Care'
 import Doctor from './pages/Doctor'
 import MyReservations from './pages/MyReservations'
 import Settings from './pages/Settings'
@@ -39,11 +40,13 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/column" element={<ColumnList />} />
           <Route path="/column/:id" element={<ColumnView />} />
         </Route>
-        <Route path="/app" element={<Home />} />
-        <Route path="/reserve" element={<Reserve />} />
-        <Route path="/directions" element={<Directions />} />
-        <Route path="/hours" element={<Hours />} />
-        <Route path="/care" element={<Care />} />
+        <Route element={<AppShell />}>
+          <Route path="/app" element={<AppHome />} />
+          <Route path="/care" element={<AppCare />} />
+          <Route path="/reserve" element={<AppBook />} />
+          <Route path="/directions" element={<AppInfo />} />
+        </Route>
+        <Route path="/hours" element={<Navigate to="/directions" replace />} />
         <Route path="/doctor" element={<Doctor />} />
         <Route path="/my" element={<MyReservations />} />
         <Route path="/settings" element={<Settings />} />

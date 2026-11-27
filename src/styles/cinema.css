@@ -297,3 +297,7 @@
 .site .cx-qa h3 { margin: 0; font-size: 1rem; line-height: 1.5; color: var(--green-dark); word-break: keep-all; }
 .cx-qa p { margin: 0; padding: 0 1.2rem 1.1rem; color: var(--muted); word-break: keep-all; }
 @media (min-width: 900px) { .cx-qa { grid-template-columns: 1fr 1fr; } }
+/* 자주 묻는 질문: 글씨를 크게 해도 화면 밖으로 넘치지 않게 */
+.cx-qa { grid-template-columns: minmax(0, 1fr); }
+.cx-qa details, .cx-qa summary > h3 { min-width: 0; overflow-wrap: anywhere; }
+@media (min-width: 900px) { .cx-qa { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

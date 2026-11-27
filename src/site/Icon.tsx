@@ -5,7 +5,9 @@ const PATHS: Record<string, string> = {
   calendar: 'M4 6h16v14H4z M4 10h16 M8 3v4 M16 3v4',
   phone: 'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A15 15 0 0 1 4 5a1 1 0 0 1 1-1z',
   leaf: 'M5 19C5 10 10 5 20 4c0 10-5 15-14 15z M5 19l8-8',
-  arrow: 'M5 12h14 M13 6l6 6-6 6'
+  arrow: 'M5 12h14 M13 6l6 6-6 6',
+  home: 'M4 11l8-7 8 7 M6 10v10h12V10 M10 20v-6h4v6',
+  book: 'M12 6c-2-1.5-5-2-8-1.5V19c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V4.500c-3-.5-6 0-8 1.5z M12 6v14.500'
 }
 
 export function Icon({ name }: { name: keyof typeof PATHS }) {
