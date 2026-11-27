@@ -66,7 +66,15 @@ export default function Reservations() {
   useEffect(() => {
     load()
     const id = setInterval(load, 60_000)
-    return () => clearInterval(id)
+    // 다른 창을 보다가 돌아오면 바로 새로 불러옵니다
+    const back = () => { if (!document.hidden) load() }
+    document.addEventListener('visibilitychange', back)
+    window.addEventListener('focus', back)
+    return () => {
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', back)
+      window.removeEventListener('focus', back)
+    }
   }, [load])
   useEffect(() => { if (adding) formRef.current?.scrollIntoView({ block: 'nearest' }) }, [adding, form.date, form.time])
 
@@ -171,11 +179,43 @@ export default function Reservations() {
           <button type="submit" className="btn primary">추가</button>
         </form>
       )
+  // 신청이 있는 달로 옮겨 가서 그 예약을 펼칩니다
+  const jump = (r: Reservation) => {
+    setView('cal')
+    setMonth(r.date.slice(0, 7))
+    setDay(r.date)
+    setPicked(r.id)
+    setEdit('')
+    setTimeout(() => document.querySelector('.slot-card')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50)
+  }
+  const waitingTitle = <h2 className="adm-h">확인할 신청 {waiting.length}건</h2>
+  const noWaiting = <p className="muted">새 신청이 없습니다.</p>
   const waitingList = (
     <>
-      <h2 className="adm-h">확인할 신청 {waiting.length}건</h2>
-      {waiting.length === 0 ? <p className="muted">새 신청이 없습니다.</p> : waiting.map(card)}
+      {waitingTitle}
+      {waiting.length === 0 ? noWaiting : waiting.map((r) => (
+        <div key={r.id}>
+          {card(r)}
+          <button type="button" className="linkbtn adm-jump" onClick={() => jump(r)}>달력에서 보기</button>
+        </div>
+      ))}
     </>
+  )
+  // PC 오른쪽 칸 맨 위: 한 줄씩 짧게
+  const waitingRows = (
+    <div className={`side-wait${waiting.length ? ' has' : ''}`}>
+      {waitingTitle}
+      {waiting.length === 0 ? noWaiting : (
+        <ul>
+          {waiting.map((r) => (
+            <li key={r.id}>
+              <button type="button" className="wait-go" onClick={() => jump(r)}><span>{prettyDate(r.date)} {prettyTime(r.time)}</span><b>{r.name}</b></button>
+              <button type="button" className="btn primary" aria-label={`${r.name}님 예약 확정`} onClick={() => run(() => booking.update(r.id, { status: 'confirmed' }))}>확정</button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
   const toggle = (
     <div className="adm-view" role="group" aria-label="보기 방식">
@@ -254,9 +294,11 @@ export default function Reservations() {
         <div className="cal-wrap">
           {calendar}
           <div className="cal-side">
-            {addForm}
-            {waiting.length > 0 && <div>{waitingList}</div>}
-            {detail}
+            {waitingRows}
+            <div className="side-scroll">
+              {addForm}
+              {detail}
+            </div>
           </div>
         </div>
       ) : (
