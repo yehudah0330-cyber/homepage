@@ -8,12 +8,12 @@
 import { clinic } from '../src/config/clinic'
 import { daySlots } from '../src/lib/schedule'
 import { pageRequest, redirect } from './pages'
-import { hasSession, login, logoutAll, logoutCookie, passwordReady } from './auth'
+import { login, logoutAll, logoutCookie, passwordReady, sessionRole, type Role } from './auth'
 
 // ── 최소 타입 (외부 타입 패키지 없이 사용) ──
 type Stmt = { bind: (...v: unknown[]) => Stmt; first: <T = Record<string, unknown>>() => Promise<T | null>; all: <T = Record<string, unknown>>() => Promise<{ results: T[] }>; run: () => Promise<unknown> }
 type D1 = { prepare: (q: string) => Stmt; batch: (s: Stmt[]) => Promise<unknown> }
-type Env = { DB: D1; ASSETS: { fetch: (r: Request) => Promise<Response> }; ACCESS_TEAM_DOMAIN?: string; ACCESS_AUD?: string; ADMIN_PASSWORD?: string; BOOKING_OPEN?: string }
+type Env = { DB: D1; ASSETS: { fetch: (r: Request) => Promise<Response> }; ACCESS_TEAM_DOMAIN?: string; ACCESS_AUD?: string; ADMIN_PASSWORD?: string; STAFF1_PASSWORD?: string; STAFF2_PASSWORD?: string; BOOKING_OPEN?: string }
 
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } })
 const fail = (msg: string, status = 400) => json({ error: msg }, status)
@@ -166,7 +166,9 @@ async function route(req: Request, env: Env, url: URL): Promise<Response> {
 
   // 쓰기 요청은 접속지당 횟수 제한 (관리자 제외)
   const ip = req.headers.get('CF-Connecting-IP') ?? 'unknown'
-  const staff = () => Promise.all([hasSession(req, env), isAdmin(req, env)]).then(([x, y]) => x || y)
+  // 로그인한 사람: 원장(owner) 또는 직원. Cloudflare Access 로 들어오면 원장으로 봅니다
+  const role = async (): Promise<Role | null> => ((await isAdmin(req, env)) ? 'owner' : sessionRole(req, env))
+  const staff = async () => (await role()) !== null
   // 다른 사이트에서 보낸 쓰기 요청은 거절
   const origin = req.headers.get('Origin')
   if (m !== 'GET' && origin && new URL(origin).host !== url.host) return fail('허용되지 않은 요청이에요.', 403)
@@ -184,14 +186,22 @@ async function route(req: Request, env: Env, url: URL): Promise<Response> {
     res.headers.append('Set-Cookie', logoutCookie())
     return res
   }
-  if (a === 'session' && m === 'GET') return json({ admin: await staff(), ready: passwordReady(env) })
+  if (a === 'session' && m === 'GET') {
+    const who = await role()
+    return json({ admin: who !== null, role: who, ready: passwordReady(env) })
+  }
   if (a === 'booking-status' && m === 'GET') {
     const open = env.BOOKING_OPEN === 'on'
     return json({ open, preview: !open && (await staff()) })
   }
 
   const admin = a === 'admin'
-  if (admin && !(await staff())) return fail('관리자 로그인이 필요해요.', 403)
+  if (admin) {
+    const who = await role()
+    if (!who) return fail('관리자 로그인이 필요해요.', 403)
+    // 직원은 예약 업무만 할 수 있습니다
+    if (who !== 'owner' && b !== 'reservations') return fail('원장님 계정으로만 할 수 있어요.', 403)
+  }
   // 이름·전화번호로 예약을 찾는 요청도 횟수를 제한합니다
   if (a === 'reservations' && b === 'lookup' && (await limited(db, req))) return fail('요청이 너무 많아요. 잠시 후 다시 시도해 주세요.', 429)
   if (!admin && m !== 'GET' && (await limited(db, req))) return fail('요청이 너무 많아요. 잠시 후 다시 시도해 주세요.', 429)
@@ -283,7 +293,7 @@ async function route(req: Request, env: Env, url: URL): Promise<Response> {
     return json({ ok: true })
   }
 
-  // ───── 관리자 (Cloudflare Access 로그인 필요) ─────
+  // ───── 관리자 (로그인 필요, 권한은 위에서 확인) ─────
   if (admin) {
     const [, x, y, z] = parts
     if (x === 'logout-all' && m === 'POST') {

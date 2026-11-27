@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { Msg } from '../../components/ui'
 import { clinic } from '../../config/clinic'
 import { booking } from '../../data/booking'
@@ -12,9 +12,11 @@ export default function AdminLayout() {
   const [remember, setRemember] = useState(true)
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
+  const [role, setRole] = useState<'owner' | 'staff1' | 'staff2' | null>(null)
+  const { pathname } = useLocation()
 
   const check = useCallback(
-    () => booking.session().then((s) => { setReady(s.ready); setState(s.admin ? 'in' : 'out') }).catch((e: Error) => { setErr(e.message); setState('out') }),
+    () => booking.session().then((s) => { setReady(s.ready); setRole(s.role); setState(s.admin ? 'in' : 'out') }).catch((e: Error) => { setErr(e.message); setState('out') }),
     []
   )
   useEffect(() => {
@@ -57,21 +59,28 @@ export default function AdminLayout() {
       </div>
     )
   }
+  const owner = role === 'owner'
+  // 직원 계정은 예약 화면만 씁니다 (서버에서도 막습니다)
+  if (!owner && pathname !== '/admin') return <Navigate to="/admin" replace />
   return (
     <div className="shell admin">
       <header className="top">
-        <div className="brand">{clinic.name} 관리</div>
+        <div className="brand">{clinic.name} 관리{!owner && <span className="adm-role">직원 {role === 'staff2' ? 2 : 1}</span>}</div>
         <button type="button" className="back" onClick={async () => { await booking.logout(); setState('out') }}>로그아웃</button>
       </header>
       <nav className="tabs" aria-label="관리 메뉴">
         <NavLink to="/admin" end>예약</NavLink>
-        <NavLink to="/admin/closed">휴진일</NavLink>
-        <NavLink to="/admin/notices">공지</NavLink>
-        <NavLink to="/admin/columns">칼럼</NavLink>
+        {owner && (
+          <>
+            <NavLink to="/admin/closed">휴진일</NavLink>
+            <NavLink to="/admin/notices">공지</NavLink>
+            <NavLink to="/admin/columns">칼럼</NavLink>
+          </>
+        )}
       </nav>
       <main className="main wide">
         <Outlet />
-        <button type="button" className="linkbtn center" onClick={async () => { if (window.confirm('모든 휴대폰과 컴퓨터에서 로그아웃합니다. 계속할까요?')) { await booking.logoutAll(); setState('out') } }}>모든 기기에서 로그아웃</button>
+        {owner && <button type="button" className="linkbtn center" onClick={async () => { if (window.confirm('모든 휴대폰과 컴퓨터에서 로그아웃합니다. 계속할까요?')) { await booking.logoutAll(); setState('out') } }}>모든 기기에서 로그아웃</button>}
       </main>
     </div>
   )
