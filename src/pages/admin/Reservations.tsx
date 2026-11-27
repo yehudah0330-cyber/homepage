@@ -114,7 +114,9 @@ export default function Reservations() {
         {r.status !== 'confirmed' && <button type="button" className="btn primary" onClick={() => run(() => booking.update(r.id, { status: 'confirmed' }))}>확정</button>}
         <button type="button" className="btn ghost" onClick={() => { setEdit(edit === r.id ? '' : r.id); setDate(r.date); setTime(r.time) }}>시간 변경</button>
         {r.status !== 'cancelled' && <button type="button" className="btn ghost" onClick={() => { if (window.confirm(`${r.name}님 예약을 취소할까요?`)) run(() => booking.update(r.id, { status: 'cancelled' })) }}>취소</button>}
-        <button type="button" className="btn kakao" onClick={() => copy(r)}>카톡 문구 복사</button>
+        {/* PC: 한 번에 복사하고 채팅 목록 열기 */}
+        <a className="btn kakao adm-onego" href={clinic.kakaoManager} target="_blank" rel="noopener noreferrer" onClick={() => copy(r)}>복사하고 채팅 열기</a>
+        <button type="button" className="btn kakao adm-copy" onClick={() => copy(r)}><span className="adm-copy-pc">문구만 복사</span><span className="adm-copy-phone">카톡 문구 복사</span></button>
         {r.phone && <a className="btn ghost adm-sms" href={`sms:${r.phone}?body=${encodeURIComponent(notice(r))}`}>문자 보내기</a>}
       </div>
       {copied?.id === r.id + r.status && (
@@ -122,7 +124,7 @@ export default function Reservations() {
           {copied.ok
             ? (
               <>
-                <p><b>"{KIND[r.status]}" 문구를 복사했습니다.</b> <b>한의원 채널 관리자</b>의 {r.name}님 대화방에 붙여넣어 보내세요.</p>
+                <p><b>"{KIND[r.status]}" 문구를 복사했습니다.</b> <b>한의원 채널 관리자</b>의 {r.name}님 대화방에 붙여넣어(PC는 Ctrl+V) 보내세요.</p>
                 <a className="btn primary adm-chat-pc" href={clinic.kakaoManager} target="_blank" rel="noopener noreferrer">채널 관리자 채팅 열기</a>
                 <p className="adm-chat-phone">휴대폰은 <b>카카오비즈니스</b> 앱 → 채팅에서 여세요.</p>
               </>

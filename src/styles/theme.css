@@ -592,3 +592,11 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outlin
 .adm-chat-pc { display: none; text-align: center; text-decoration: none; }
 @media (hover: hover) and (pointer: fine) { .adm-copied .adm-chat-pc { display: flex; align-items: center; justify-content: center; min-height: 2.75rem; font-size: .85rem; } .adm-copied .adm-chat-phone { display: none; } }
 .adm-role { display: inline-block; margin-left: .5rem; padding: .1rem .55rem; border-radius: 999px; background: #1f5f9e; color: #fff; font-size: .75rem; white-space: nowrap; vertical-align: middle; }
+/* 복사하고 채팅 열기: PC(마우스)에서만 */
+.adm-btns .adm-onego, .adm-copy-pc { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .adm-btns .adm-onego { display: flex; grid-column: 1 / -1; align-items: center; justify-content: center; text-decoration: none; text-align: center; }
+  .adm-btns .btn.kakao.adm-copy { background: transparent; border-color: var(--green); color: inherit; }
+  .adm-copy-pc { display: inline; }
+  .adm-copy-phone { display: none; }
+}
