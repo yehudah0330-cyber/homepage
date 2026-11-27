@@ -180,3 +180,10 @@
 .ap .ap-arrow { font-size: min(2.2rem, 9vw); }
 .ap-sheet-close { font-size: min(.9rem, 4.8vw); }
 .ap-sheet li::before { width: min(1.6rem, 8vw); height: min(1.6rem, 8vw); font-size: min(.85rem, 4.4vw); }
+
+/* 예약: 카카오톡으로 보내기 */
+.ap .ap-btn.kakao { min-height: 3.4rem; background: #fee500; color: #191600; font-size: min(1.05rem, 5.2vw); box-shadow: 0 8px 22px rgba(254, 229, 0, .5); }
+.ap-summary .ap-how { margin: 0; padding-left: 1.2rem; display: grid; gap: .3rem; font-size: min(.85rem, 4.5vw); }
+.ap-copied { font-weight: 700; color: #2e6a47; }
+.ap-msg summary { min-height: 2.4rem; display: flex; align-items: center; cursor: pointer; text-decoration: underline; color: var(--soft); font-size: .8rem; }
+.ap-msg pre { margin: 0; padding: .7rem .8rem; border-radius: .8rem; background: #f1e9d6; font: inherit; white-space: pre-wrap; user-select: all; }

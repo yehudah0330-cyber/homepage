@@ -1,4 +1,4 @@
-// 예약: 원하는 진료·날짜·시간을 고른 뒤 전화로 확정합니다.
+// 예약: 원하는 진료·날짜·시간을 고른 뒤 카카오톡 채널 채팅이나 전화로 신청합니다. 병원 답을 받아야 확정입니다.
 // 관리자 화면이 열리기 전까지는 예약을 서버에 저장하지 않습니다 (직원이 볼 수 없는 예약이 생기지 않도록).
 // 서버에 저장하는 예전 예약 화면은 src/pages/Reserve.tsx 에 그대로 있습니다.
 import { useMemo, useState } from 'react'
@@ -29,7 +29,11 @@ export default function AppBook() {
   const slots = date ? slotsOf(date) : []
   const picked = clinic.services.find((s) => s.id === care)
   const ready = picked && date && time && slots.includes(time)
-  const message = ready ? `[${clinic.name} 예약 요청] ${prettyDate(date)} ${prettyTime(time)}, ${picked.title}` : ''
+  const message = ready ? `[${clinic.name} 예약 요청]
+날짜: ${prettyDate(date)}
+시간: ${prettyTime(time)}
+진료: ${picked.title}
+성함: ` : ''
 
   const copy = async () => {
     try {
@@ -43,7 +47,7 @@ export default function AppBook() {
   return (
     <main className="ap-body top">
       <h1>진료 예약</h1>
-      <p className="ap-lead">원하는 시간을 고른 뒤 <b>전화로 확정</b>해 주세요.</p>
+      <p className="ap-lead">원하는 시간을 고른 뒤 <b>카카오톡이나 전화</b>로 신청해 주세요.</p>
 
       <h2 className="ap-label">1. 진료 종류</h2>
       <div className="ap-chips">
@@ -80,9 +84,20 @@ export default function AppBook() {
         {ready ? (
           <>
             <p className="ap-sum-when">{prettyDate(date)}<br />{prettyTime(time)} · {picked.title}</p>
-            <p><b>아직 예약이 확정되지 않았습니다.</b> 아래 버튼으로 전화해 이 시간을 말씀해 주세요.</p>
-            <a className="ap-btn gold" href={tel}><Icon name="phone" />{clinic.phone} 전화하기</a>
-            <button type="button" className="ap-btn line" onClick={copy}>{copied ? '복사했습니다' : '내용 복사하기'}</button>
+            <p><b>아직 예약이 확정되지 않았습니다.</b> 병원의 답을 받으면 확정됩니다.</p>
+            {clinic.kakaoChat && (
+              <>
+                <a className="ap-btn kakao" href={clinic.kakaoChat} target="_blank" rel="noopener noreferrer" onClick={copy}>카카오톡으로 보내기</a>
+                <ol className="ap-how">
+                  <li>위 버튼을 누르면 <b>예약 내용이 복사</b>되고 병원 채팅창이 열립니다.</li>
+                  <li>입력칸을 <b>길게 눌러 붙여넣기</b>를 하세요.</li>
+                  <li><b>성함을 적고 보내기</b>를 누르세요.</li>
+                </ol>
+                {copied && <p className="ap-copied" role="status">예약 내용을 복사했습니다.</p>}
+                <details className="ap-msg"><summary>복사되는 내용 보기</summary><pre>{message}</pre></details>
+              </>
+            )}
+            <a className="ap-btn line" href={tel}><Icon name="phone" />전화로 신청하기 {clinic.phone}</a>
           </>
         ) : (
           <>
