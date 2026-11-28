@@ -91,13 +91,15 @@ async function isAdmin(req: Request, env: Env): Promise<boolean> {
   }
 }
 
-// ── 남용 방지: 같은 접속지에서 10분에 20번까지만 쓰기 ──
-async function limited(db: D1, req: Request): Promise<boolean> {
-  const ip = req.headers.get('CF-Connecting-IP') ?? 'unknown'
+// ── 남용 방지: 같은 접속지에서 10분 동안 예약·취소 20번, 내 예약 조회 60번 (따로 셉니다) ──
+async function limited(db: D1, req: Request, kind: 'write' | 'lookup' = 'write'): Promise<boolean> {
+  const from = req.headers.get('CF-Connecting-IP') ?? 'unknown'
+  const ip = kind === 'lookup' ? `lookup:${from}` : from
+  const max = kind === 'lookup' ? 60 : 20
   const now = Date.now()
   await db.prepare('DELETE FROM hits WHERE at < ?').bind(now - 3600_000).run()
   const row = await db.prepare('SELECT COUNT(*) AS n FROM hits WHERE ip = ? AND at > ?').bind(ip, now - 600_000).first<{ n: number }>()
-  if ((row?.n ?? 0) >= 20) return true
+  if ((row?.n ?? 0) >= max) return true
   await db.prepare('INSERT INTO hits (ip, at) VALUES (?, ?)').bind(ip, now).run()
   return false
 }
@@ -225,7 +227,7 @@ async function route(req: Request, env: Env, url: URL, tell: Tell): Promise<Resp
     if (who !== 'owner' && b !== 'reservations') return fail('원장님 계정으로만 할 수 있어요.', 403)
   }
   // 이름·전화번호로 예약을 찾는 요청도 횟수를 제한합니다
-  if (a === 'reservations' && b === 'lookup' && (await limited(db, req))) return fail('요청이 너무 많아요. 잠시 후 다시 시도해 주세요.', 429)
+  if (a === 'reservations' && b === 'lookup' && (await limited(db, req, 'lookup'))) return fail('요청이 너무 많아요. 잠시 후 다시 시도해 주세요.', 429)
   if (!admin && m !== 'GET' && (await limited(db, req))) return fail('요청이 너무 많아요. 잠시 후 다시 시도해 주세요.', 429)
 
   // ───── 공개 ─────
