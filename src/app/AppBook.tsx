@@ -20,7 +20,7 @@ export default function AppBook() {
   const [params] = useSearchParams()
   const { closed } = useToday()
   const [mode, setMode] = useState({ open: false, preview: false })
-  const [care, setCare] = useState(clinic.services.find((s) => s.id === params.get('care'))?.id ?? '')
+  const [cares, setCares] = useState<string[]>(() => clinic.services.filter((s) => s.id === params.get('care')).map((s) => s.id))
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [copied, setCopied] = useState(false)
@@ -55,9 +55,9 @@ export default function AppBook() {
   }
   const days = useMemo(() => Array.from({ length: clinic.bookingDays }, (_, i) => toISO(addDays(new Date(), i))), [])
   const slots = date ? slotsOf(date) : []
-  const picked = clinic.services.find((s) => s.id === care)
+  const picked = clinic.services.filter((s) => cares.includes(s.id)).map((s) => s.title).join(', ')
   const ready = picked && date && time && slots.includes(time)
-  const message = ready ? `[${clinic.name} 예약 요청]\n날짜: ${prettyDate(date)}\n시간: ${prettyTime(time)}\n진료: ${picked.title}\n성함: ` : ''
+  const message = ready ? `[${clinic.name} 예약 요청]\n날짜: ${prettyDate(date)}\n시간: ${prettyTime(time)}\n진료: ${picked}\n성함: ` : ''
   const reset = () => { setCopied(false); setErr(''); setDone(null) }
   // 신청한 뒤 카톡 채널에 보내는 글: 병원에 알림이 가고, 그 대화방으로 답을 받습니다.
   const request = done ? `[예약 신청]
@@ -85,7 +85,7 @@ export default function AppBook() {
     setBusy(true)
     setErr('')
     try {
-      const r = await booking.request({ name: name.trim(), phone: normPhone(phone), date, time, service: picked.title })
+      const r = await booking.request({ name: name.trim(), phone: normPhone(phone), date, time, service: picked })
       setMe({ name: name.trim(), phone: normPhone(phone) })
       setCopied(false)
       setDone(r)
@@ -115,11 +115,12 @@ export default function AppBook() {
       <p className="ap-lead">{online ? <>원하는 시간을 고르고 <b>예약 신청</b>을 눌러 주세요.</> : <>원하는 시간을 고른 뒤 <b>카카오톡이나 전화</b>로 신청해 주세요.</>}</p>
 
       <h2 className="ap-label">1. 진료 종류</h2>
-      <div className="ap-chips">
+      <div className="ap-chips multi">
         {clinic.services.map((s) => (
-          <button key={s.id} type="button" aria-pressed={care === s.id} onClick={() => { setCare(s.id); reset() }}>{s.title}</button>
+          <button key={s.id} type="button" aria-pressed={cares.includes(s.id)} onClick={() => { setCares((c) => (c.includes(s.id) ? c.filter((x) => x !== s.id) : [...c, s.id])); reset() }}>{s.title}</button>
         ))}
       </div>
+      <p className="ap-multi">2개 이상 선택도 가능합니다.</p>
 
       <h2 className="ap-label">2. 날짜</h2>
       <div className="ap-days">
@@ -173,7 +174,7 @@ export default function AppBook() {
         )}
         {ready ? (
           <>
-            <p className="ap-sum-when">{prettyDate(date)}<br />{prettyTime(time)} · {picked.title}</p>
+            <p className="ap-sum-when">{prettyDate(date)}<br />{prettyTime(time)} · {picked}</p>
             {online ? (
               <>
                 {avail[time] === 0 && <p>예약이 많은 시간입니다. 병원에서 다른 시간을 안내드릴 수 있습니다.</p>}

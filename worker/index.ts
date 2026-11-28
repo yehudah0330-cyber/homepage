@@ -8,12 +8,13 @@
 import { clinic } from '../src/config/clinic'
 import { daySlots } from '../src/lib/schedule'
 import { pageRequest, redirect } from './pages'
+import { prettyDate, prettyTime } from '../src/lib/date'
 import { login, logoutAll, logoutCookie, passwordReady, sessionRole, type Role } from './auth'
 
 // ── 최소 타입 (외부 타입 패키지 없이 사용) ──
 type Stmt = { bind: (...v: unknown[]) => Stmt; first: <T = Record<string, unknown>>() => Promise<T | null>; all: <T = Record<string, unknown>>() => Promise<{ results: T[] }>; run: () => Promise<unknown> }
 type D1 = { prepare: (q: string) => Stmt; batch: (s: Stmt[]) => Promise<unknown> }
-type Env = { DB: D1; ASSETS: { fetch: (r: Request) => Promise<Response> }; ACCESS_TEAM_DOMAIN?: string; ACCESS_AUD?: string; ADMIN_PASSWORD?: string; STAFF1_PASSWORD?: string; STAFF2_PASSWORD?: string; BOOKING_OPEN?: string }
+type Env = { DB: D1; ASSETS: { fetch: (r: Request) => Promise<Response> }; ACCESS_TEAM_DOMAIN?: string; ACCESS_AUD?: string; ADMIN_PASSWORD?: string; STAFF1_PASSWORD?: string; STAFF2_PASSWORD?: string; BOOKING_OPEN?: string; DISCORD_WEBHOOK_URL?: string }
 
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } })
 const fail = (msg: string, status = 400) => json({ error: msg }, status)
@@ -135,14 +136,31 @@ async function slotError(db: D1, date: string, time: string, ignoreId?: string):
 
 // ── 보관 기간: 예약일이 지난 지 3개월(92일)이 넘으면 지웁니다 ──
 const purge = (db: D1) => db.prepare('DELETE FROM reservations WHERE date < ?').bind(addDaysISO(kstParts(), -92)).run()
-const serviceName = (v: unknown) => clinic.services.find((s) => s.title === v)?.title ?? null
+// 진료 종류는 여러 개 고를 수 있습니다 ("침 치료, 한약"). 목록에 있는 이름만 남깁니다.
+const serviceName = (v: unknown) => {
+  const picked = new Set(typeof v === 'string' ? v.split(',').map((s) => s.trim()) : [])
+  return clinic.services.filter((s) => picked.has(s.title)).map((s) => s.title).join(', ') || null
+}
+
+// 디스코드 알림: 비밀값 DISCORD_WEBHOOK_URL 이 있을 때만 보냅니다.
+// 개인정보 보호를 위해 날짜와 시간만 보내고 이름·전화번호·진료 종류는 보내지 않습니다.
+async function notifyDiscord(env: Env, content: string) {
+  const hook = env.DISCORD_WEBHOOK_URL?.trim()
+  if (!hook || !/^(https:\/\/((ptb|canary)\.)?discord(app)?\.com\/api\/webhooks\/|http:\/\/127\.0\.0\.1[:/])/.test(hook)) return
+  try {
+    const res = await fetch(hook, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content, allowed_mentions: { parse: [] } }) })
+    if (!res.ok) console.log('디스코드 알림 실패', res.status)
+  } catch {
+    console.log('디스코드 알림 실패')
+  }
+}
 
 export default {
   async scheduled(_event: unknown, env: Env): Promise<void> {
     await ensureSchema(env.DB)
     await purge(env.DB)
   },
-  async fetch(req: Request, env: Env): Promise<Response> {
+  async fetch(req: Request, env: Env, ctx?: { waitUntil: (p: Promise<unknown>) => void }): Promise<Response> {
     const url = new URL(req.url)
     const moved = redirect(url)
     if (moved) return moved
@@ -151,14 +169,18 @@ export default {
     }
     try {
       await ensureSchema(env.DB)
-      return await route(req, env, url)
+      // 알림은 답을 먼저 보낸 뒤에 처리합니다
+      const tell = (title: string, date: string, time: string) => ctx?.waitUntil(notifyDiscord(env, `${title}: ${prettyDate(date)} ${prettyTime(time)}
+관리자 화면에서 확인하세요 → <${url.origin}/admin>`))
+      return await route(req, env, url, tell)
     } catch {
       return fail('서버에 문제가 생겼어요. 잠시 후 다시 시도해 주세요.', 500)
     }
   }
 }
 
-async function route(req: Request, env: Env, url: URL): Promise<Response> {
+type Tell = (title: string, date: string, time: string) => void
+async function route(req: Request, env: Env, url: URL, tell: Tell): Promise<Response> {
   const db = env.DB
   const m = req.method
   const parts = url.pathname.split('/').filter(Boolean).slice(1) // api 다음부터
@@ -238,6 +260,7 @@ async function route(req: Request, env: Env, url: URL): Promise<Response> {
     const row: ResRow = { id: uid(), name, phone, date: body.date, time: body.time, status: 'pending', created_at: new Date().toISOString(), care_label: null, care_end: null, service: serviceName(body.service) }
     await db.prepare('INSERT INTO reservations (id,name,phone,date,time,status,created_at,service) VALUES (?,?,?,?,?,?,?,?)').bind(row.id, name, phone, row.date, row.time, row.status, row.created_at, row.service).run()
     await purge(db)
+    tell('🔔 새 예약 신청', row.date, row.time)
     return json(toRes(row))
   }
   if (a === 'reservations' && b === 'lookup' && m === 'GET') {
@@ -251,6 +274,7 @@ async function route(req: Request, env: Env, url: URL): Promise<Response> {
     const r = await db.prepare('SELECT * FROM reservations WHERE id=?').bind(b).first<ResRow>()
     if (!r) return fail('예약을 찾을 수 없어요.', 404)
     await db.prepare("UPDATE reservations SET status='cancelled' WHERE id=?").bind(b).run()
+    if (r.status !== 'cancelled') tell('❌ 환자가 예약을 취소했습니다', r.date, r.time)
     return json(toRes({ ...r, status: 'cancelled' }))
   }
   if (a === 'reservations' && b && !c && m === 'PATCH') {

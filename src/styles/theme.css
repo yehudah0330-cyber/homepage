@@ -600,3 +600,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outlin
   .adm-copy-pc { display: inline; }
   .adm-copy-phone { display: none; }
 }
+.adm-services { display: flex; flex-wrap: wrap; gap: .3rem .9rem; margin: 0; padding: .4rem .6rem; border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+.adm-services legend { font-size: .8rem; color: var(--muted); }
+.adm-services label { display: flex; align-items: center; gap: .35rem; min-height: 2.5rem; }
+.adm-card .adm-services input { width: 1.25rem; height: 1.25rem; min-height: 0; padding: 0; flex: none; }

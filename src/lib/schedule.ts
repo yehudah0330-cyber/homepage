@@ -33,7 +33,7 @@ export function todayState(now: Date, closedDates: Record<string, string>): Toda
   const end = prettyTime(h.close)
   const tag = h.night ? '야간진료' : '진료'
   if (m < toMin(h.open)) return { kind: 'before', text: `오늘 ${prettyTime(h.open)}부터 ${end}까지${h.night ? ' 야간진료' : ' 진료'}합니다` }
-  if (m >= toMin(h.close)) return { kind: 'after', text: `오늘 ${tag}이 끝났습니다 (${end}까지)` }
+  if (m >= toMin(h.close)) return { kind: 'after', text: `오늘 ${tag}가 끝났습니다 (${end}까지)` }
   if (h.lunchStart && h.lunchEnd && m >= toMin(h.lunchStart) && m < toMin(h.lunchEnd))
     return { kind: 'lunch', text: `지금은 점심시간 · ${prettyTime(h.lunchEnd)}부터 진료${h.night ? ` (오늘은 ${end}까지 야간진료)` : ''}` }
   return { kind: 'open', text: h.night ? `오늘은 야간진료일 · ${end}까지 진료합니다` : `오늘 진료 중 · ${end}까지` }

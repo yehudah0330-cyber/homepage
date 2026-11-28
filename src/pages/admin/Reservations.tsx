@@ -180,10 +180,14 @@ export default function Reservations() {
           <input inputMode="tel" placeholder="전화번호 (선택)" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           <input type="date" required aria-label="날짜" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
           <input type="time" required aria-label="시간" step={1800} value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} />
-          <select value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} aria-label="진료 항목">
-            <option value="">진료 항목 (선택)</option>
-            {clinic.services.map((s) => <option key={s.id}>{s.title}</option>)}
-          </select>
+          <fieldset className="adm-services">
+            <legend>진료 항목 (선택, 여러 개 가능)</legend>
+            {clinic.services.map((s) => {
+              const on = form.service.split(', ').includes(s.title)
+              const toggle = () => setForm({ ...form, service: clinic.services.filter((x) => (x.id === s.id ? !on : form.service.split(', ').includes(x.title))).map((x) => x.title).join(', ') })
+              return <label key={s.id}><input type="checkbox" checked={on} onChange={toggle} />{s.title}</label>
+            })}
+          </fieldset>
           <button type="submit" className="btn primary">추가</button>
         </form>
       )
